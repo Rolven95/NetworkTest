@@ -14,10 +14,12 @@ public class sender {
         		
             unicast_packet to_sent = new unicast_packet();
             to_sent.setSeq(seq);
+            
             to_sent.setDeparture(System.currentTimeMillis());
+            System.out.println( "dep: " + System.currentTimeMillis());
+            
             to_sent.setFrom(InetAddress.getLocalHost().getHostAddress().toString());	
-            
-            
+                        
             byte[] buf = to_sent.toByteArray();
             
             DatagramPacket packet = new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9002);

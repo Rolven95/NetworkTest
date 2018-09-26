@@ -54,6 +54,8 @@ public class unicast_packet {
 		buffer.order(ByteOrder.BIG_ENDIAN);
 		buffer.putInt(this.seq);	    	  // 4bytes 0-3
 		buffer.putLong(this.departure); 	  // 8bytes 4-11
+		
+		
 		buffer.putLong(this.arrival);    	  // 8bytes 12-19
 		buffer.putLong(this.processing_cost); // 8bytes 20-27
 		byte ip_in_bytes[] = InetAddress.getByName(this.from).getAddress();
@@ -62,6 +64,13 @@ public class unicast_packet {
 		buffer.put(ip_in_bytes[2]);
 		buffer.put(ip_in_bytes[3]);
 		byte[] bytes = buffer.array();	
+		
+		//for(int i = 0; i<32 ; i++) {
+		//	System.out.println("all["+ i +"] =  "+ bytes[i]);
+		//}
+		
+		//System.out.println("dep decoded is : " + longFrom8Bytes(bytes, 4, false));
+		
 		return bytes;
 	}
 	

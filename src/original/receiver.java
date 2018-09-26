@@ -15,9 +15,9 @@ public class receiver {
                 socket.receive(packet);
                 byte[] data = packet.getData();
                 unicast_packet arrival = new unicast_packet(); 
-                arrival.bytes_to_packet(data);
+                arrival = arrival.bytes_to_packet(data);
 
-                System.out.println("receved " + arrival.getSeq());
+                System.out.println("receved " + arrival.getSeq()+ "dep = " + arrival.getdeparture());
             }
         } catch (Exception e) {
             e.printStackTrace();
