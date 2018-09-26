@@ -4,13 +4,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class sender {
+public class Sender {
     public void send(){        
         try {
             
         	DatagramSocket socket = new DatagramSocket();
         	int seq = 0;
-        	while(true) {
+        	while(seq<1105) {
         		
             unicast_packet to_sent = new unicast_packet();
             to_sent.setSeq(seq);
@@ -30,14 +30,13 @@ public class sender {
             //socket.close();
         } catch (Exception e) {            
             e.printStackTrace();
-            
         }
     }
     public static void main(String[] args) {
     	new Thread(){
             @Override
             public void run() {
-                sender s = new sender();
+                Sender s = new Sender();
                 s.send();
             }
         }.start();

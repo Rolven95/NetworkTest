@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class receiver {
+public class Receiver {
 	public void server(){
         try {
             System.out.println("start===================start");
@@ -16,7 +16,6 @@ public class receiver {
                 byte[] data = packet.getData();
                 unicast_packet arrival = new unicast_packet(); 
                 arrival = arrival.bytes_to_packet(data);
-
                 System.out.println("receved " + arrival.getSeq()+ "dep = " + arrival.getdeparture());
             }
         } catch (Exception e) {
@@ -29,7 +28,7 @@ public class receiver {
         new Thread(){
             @Override
             public void run() {
-                receiver r = new receiver();
+                Receiver r = new Receiver();
                 r.server();
             }
         }.start();
