@@ -12,7 +12,7 @@ public class unicast_packet {
 	
 	private int seq; // 
 	private long departure; 
-	private long arrival; //useless
+	private long arrival; 
 	private long processing_cost; //so fucking helpful
 	private String from;  
 	
@@ -62,6 +62,13 @@ public class unicast_packet {
 		buffer.put(ip_in_bytes[2]);
 		buffer.put(ip_in_bytes[3]);
 		byte[] bytes = buffer.array();	
+		
+		//for(int i = 0; i<32 ; i++) {
+		//	System.out.println("all["+ i +"] =  "+ bytes[i]);
+		//}
+		
+		//System.out.println("dep decoded is : " + longFrom8Bytes(bytes, 4, false));
+		
 		return bytes;
 	}
 	
@@ -84,7 +91,6 @@ public class unicast_packet {
         seq |= ((input[0] << 24) & 0xFF000000);
         
         long dep = longFrom8Bytes(input, 4, false);
-        
         long cost = longFrom8Bytes(input, 20, false);
         
         String from_addr = (input[28] & 0xff) 
