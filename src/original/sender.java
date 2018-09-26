@@ -5,7 +5,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class sender {
-    public static void send(){        
+    public void send(){        
         try {
             
         	DatagramSocket socket = new DatagramSocket();
@@ -23,7 +23,13 @@ public class sender {
         }
     }
     public static void main(String[] args) {
-        send();
+    	new Thread(){
+            @Override
+            public void run() {
+                sender s = new sender();
+                s.send();
+            }
+        }.start();
     }
 
 }
