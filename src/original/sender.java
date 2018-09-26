@@ -9,12 +9,21 @@ public class sender {
         try {
             
         	DatagramSocket socket = new DatagramSocket();
+        	int seq = 0;
         	while(true) {
-            String text = "test";
-            byte[] buf = text.getBytes();
+        		
+            unicast_packet to_sent = new unicast_packet();
+            to_sent.setSeq(seq);
+            to_sent.setDeparture(System.currentTimeMillis());
+            to_sent.setFrom(InetAddress.getLocalHost().getHostAddress().toString());	
+            
+            
+            byte[] buf = to_sent.toByteArray();
+            
             DatagramPacket packet = new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9002);
             socket.send(packet);
-            System.out.println("sent");
+            System.out.println( seq +" sent");
+            seq++;
             }
             //socket.close();
         } catch (Exception e) {            
@@ -31,5 +40,5 @@ public class sender {
             }
         }.start();
     }
-
+ 
 }

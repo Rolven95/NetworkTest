@@ -14,8 +14,10 @@ public class receiver {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 byte[] data = packet.getData();
-                String msg = new String(data, 0, packet.getLength());
-                System.out.println(msg);
+                unicast_packet arrival = new unicast_packet(); 
+                arrival.bytes_to_packet(data);
+
+                System.out.println("receved " + arrival.getSeq());
             }
         } catch (Exception e) {
             e.printStackTrace();
