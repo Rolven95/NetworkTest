@@ -2,8 +2,15 @@ package original;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Sender {
 	
@@ -11,6 +18,7 @@ public class Sender {
         try {
         	DatagramSocket socket = new DatagramSocket();
         	int seq = 0;
+        	String localIp = "192.168.202.20";
         	while(seq<1105) {
         		
             unicast_packet to_sent = new unicast_packet();
@@ -19,12 +27,15 @@ public class Sender {
             to_sent.setDeparture(System.currentTimeMillis());
             System.out.println( "dep: " + System.currentTimeMillis());
             
-            to_sent.setFrom(InetAddress.getLocalHost().getHostAddress().toString());	
+            to_sent.setFrom(localIp);
+            System.out.println( localIp);
+            
             history.insert_sent(to_sent);       
             
             byte[] buf = to_sent.toByteArray();
             
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, InetAddress.getLocalHost(), 9002);
+            DatagramPacket packet = new DatagramPacket(buf, buf.length,
+            		InetAddress.getByName("192.168.202.191"), 9002); //192.168.202.191  192.168.109.1
             socket.send(packet);
             System.out.println( seq +" sent");
             seq++;
@@ -34,12 +45,33 @@ public class Sender {
             e.printStackTrace();
         }
     }
-
-    
-    public void receive_NAK(History history){
+	private static String getHostIp(){
+		try{
+			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+			while (allNetInterfaces.hasMoreElements()){
+				NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+				Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+				while (addresses.hasMoreElements()){
+					InetAddress ip = (InetAddress) addresses.nextElement();
+					if (ip != null 
+							&& ip instanceof Inet4Address
+                    		&& !ip.isLoopbackAddress() //loopback地址即本机地址，IPv4的loopback范围是127.0.0.0 ~ 127.255.255.255
+                    		&& ip.getHostAddress().indexOf(":")==-1){
+						System.out.println("本机的IP = " + ip.getHostAddress());
+						return ip.getHostAddress();
+					} 
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+    public void receive_ACK(History history){
         try {
             System.out.println("Sender start");
-            DatagramSocket NAK_socket = new DatagramSocket(9001);
+            DatagramSocket ACK_socket = new DatagramSocket(9001);
             
             //long time_out = 0; 
             
@@ -48,13 +80,13 @@ public class Sender {
             	
             	byte[] buf = new byte[2048];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                NAK_socket.receive(packet);
+                ACK_socket.receive(packet);
                 byte[] data = packet.getData();
                 unicast_packet arrival = new unicast_packet(); 
                 arrival = arrival.bytes_to_packet(data);
                 arrival.setArrival(System.currentTimeMillis());
-                System.out.println("receved NAK of " + arrival.getSeq());
-                history.insert_NAK(arrival);
+                System.out.println("receved ACK of " + arrival.getSeq());
+                history.insert_ACK(arrival);
 
             }
         } catch (Exception e) {
@@ -89,7 +121,7 @@ public class Sender {
             @Override
             public void run() {
             	Sender s = new Sender();
-                s.receive_NAK(history);
+                s.receive_ACK(history);
             }
         }.start();
     }
@@ -97,7 +129,7 @@ public class Sender {
     static class History {
     	ArrayList <unicast_packet> sent_history = new ArrayList<unicast_packet>(); 
     	
-    	ArrayList <unicast_packet> NAK_history = new ArrayList<unicast_packet>(); 
+    	ArrayList <unicast_packet> ACK_history = new ArrayList<unicast_packet>(); 
     	
     	
     	//ArrayList<Integer> list1=new ArrayList<Integer>()
@@ -107,50 +139,50 @@ public class Sender {
     		sent_history.add(to_insert);
 
     	}
-    	public synchronized void insert_NAK(unicast_packet to_insert ) {
+    	public synchronized void insert_ACK(unicast_packet to_insert ) {
     		
-    		NAK_history.add(to_insert);
+    		ACK_history.add(to_insert);
 
     	}
     	
     	public float getLossRate () {
     		float result; 
     		int total = sent_history.size();
-    		int received = NAK_history.size(); 
+    		int received = ACK_history.size(); 
     		result = (total - received)/total; 
-    		//return (double)( (double)sent_history.size() - (double)NAK_history.size()) / (double)sent_history.size(); 
+    		//return (double)( (double)sent_history.size() - (double)ACK_history.size()) / (double)sent_history.size(); 
     	 return (float) (total - received)/total;
     	}
     	
     	public float getAverageRTT () {
     		float totalRTT = 0 ; 
     		for(int i = 0 ; i < this.sent_history.size() ; i++) {
-    			for (int q = 0 ; q < this.NAK_history.size() ; q++) {
-    				if( this.sent_history.get(i).getSeq() == this.NAK_history.get(q).getSeq() ) {
+    			for (int q = 0 ; q < this.ACK_history.size() ; q++) {
+    				if( this.sent_history.get(i).getSeq() == this.ACK_history.get(q).getSeq() ) {
     					
-    					totalRTT +=  this.NAK_history.get(q).getArrival() 
-    								- this.NAK_history.get(q).getProcessing_cost() 
-    								- this.NAK_history.get(q).getdeparture();
+    					totalRTT +=  this.ACK_history.get(q).getArrival() 
+    								- this.ACK_history.get(q).getProcessing_cost() 
+    								- this.ACK_history.get(q).getdeparture();
     				}
     			}
     		}
-    		return (float)totalRTT/this.NAK_history.size(); 
+    		return (float)totalRTT/this.ACK_history.size(); 
     	}
     	
     	public float getRTTVariance () {
     		float averageRTT = this.getAverageRTT(); 
     		float bigfuck = 0;
     		for(int i = 0 ; i < this.sent_history.size() ; i++) {
-    			for (int q = 0 ; q < this.NAK_history.size() ; q++) {
-    				if( this.sent_history.get(i).getSeq() == this.NAK_history.get(q).getSeq() ) {
+    			for (int q = 0 ; q < this.ACK_history.size() ; q++) {
+    				if( this.sent_history.get(i).getSeq() == this.ACK_history.get(q).getSeq() ) {
     					
-    					bigfuck +=  Math.pow((this.NAK_history.get(q).getArrival() 
-    							- this.NAK_history.get(q).getProcessing_cost() 
-    							- this.NAK_history.get(q).getdeparture()-averageRTT),2);
+    					bigfuck +=  Math.pow((this.ACK_history.get(q).getArrival() 
+    							- this.ACK_history.get(q).getProcessing_cost() 
+    							- this.ACK_history.get(q).getdeparture()-averageRTT),2);
     				}
     			}
     		}
-    		return bigfuck/(this.NAK_history.size()-1); 
+    		return bigfuck/(this.ACK_history.size()-1); 
     	}
     }
  
