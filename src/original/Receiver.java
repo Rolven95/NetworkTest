@@ -9,7 +9,7 @@ public class Receiver {
         try {
             System.out.println("Receiver starts");
             DatagramSocket socket = new DatagramSocket(9002);
-            DatagramSocket NAK_socket = new DatagramSocket();
+            DatagramSocket ACK_socket = new DatagramSocket();
             while(true){ 
                 byte[] buf = new byte[2048];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -24,8 +24,8 @@ public class Receiver {
                 DatagramPacket to_sent_back = new DatagramPacket(arrival.toByteArray(),
                 		arrival.toByteArray().length, InetAddress.getByName(arrival.getFrom()), 9001);
                
-                NAK_socket.send(to_sent_back);
-                System.out.println( arrival.getSeq() +" NAK sent");
+                ACK_socket.send(to_sent_back);
+                System.out.println( arrival.getSeq() +" ACK sent");
             }
         } catch (Exception e) {
             e.printStackTrace();
