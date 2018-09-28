@@ -1,11 +1,16 @@
 package original;
 
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
 
 //import java.lang;
 public class unicast_packet {
@@ -14,7 +19,7 @@ public class unicast_packet {
 	private long departure; 
 	private long arrival; 
 	private long processing_cost; //so fucking helpful
-	private String from;  
+	private String from = this.getIP();  
 	
 	//System.currentTimeMillis()
 	
@@ -48,7 +53,32 @@ public class unicast_packet {
 	public void setFrom(String ss) {
 		this.from = ss;
 	}
-	
+	public String getIP(){
+
+	    try {
+	        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+	             NetworkInterface intf = en.nextElement();
+	            for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();)
+	              {
+	                InetAddress inetAddress = enumIpAddr.nextElement();
+	                //if (!inetAddress.isLoopbackAddress() && (inetAddress instanceof Inet4Address))
+	                if (!inetAddress.isLoopbackAddress()){
+	                    //System.out.println(inetAddress.getHostAddress().toString());
+	                	if (inetAddress instanceof Inet6Address)
+	    				{
+	    					System.out.println("v6:" + inetAddress.getHostAddress());
+	    				}
+	                	return inetAddress.getHostAddress().toString();
+	                }
+	            }
+	        }
+	    }
+	    catch (SocketException ex){
+	        ex.printStackTrace();
+	    }
+	    return null;
+	}
+
 	public byte[] toByteArray() throws UnknownHostException {
 		ByteBuffer buffer = ByteBuffer.allocate(32);		
 		buffer.order(ByteOrder.BIG_ENDIAN);

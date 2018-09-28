@@ -25,17 +25,14 @@ public class Sender {
             to_sent.setSeq(seq);
             
             to_sent.setDeparture(System.currentTimeMillis());
-            System.out.println( "dep: " + System.currentTimeMillis());
+            //System.out.println( "dep: " + System.currentTimeMillis());
             
             to_sent.setFrom(localIp);
-            System.out.println( localIp);
-            
+            //System.out.println( localIp);
             history.insert_sent(to_sent);       
-            
             byte[] buf = to_sent.toByteArray();
-            
             DatagramPacket packet = new DatagramPacket(buf, buf.length,
-            		InetAddress.getByName("192.168.202.191"), 9002); //192.168.202.191  192.168.109.1
+            		InetAddress.getByName("10.0.2.15"), 9002); //192.168.202.191  192.168.109.1
             socket.send(packet);
             System.out.println( seq +" sent");
             seq++;
@@ -45,30 +42,7 @@ public class Sender {
             e.printStackTrace();
         }
     }
-	private static String getHostIp(){
-		try{
-			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
-			while (allNetInterfaces.hasMoreElements()){
-				NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
-				Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
-				while (addresses.hasMoreElements()){
-					InetAddress ip = (InetAddress) addresses.nextElement();
-					if (ip != null 
-							&& ip instanceof Inet4Address
-                    		&& !ip.isLoopbackAddress() //loopback地址即本机地址，IPv4的loopback范围是127.0.0.0 ~ 127.255.255.255
-                    		&& ip.getHostAddress().indexOf(":")==-1){
-						System.out.println("本机的IP = " + ip.getHostAddress());
-						return ip.getHostAddress();
-					} 
-				}
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-    public void receive_ACK(History history){
+	public void receive_ACK(History history){
         try {
             System.out.println("Sender start");
             DatagramSocket ACK_socket = new DatagramSocket(9001);

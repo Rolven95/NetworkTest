@@ -8,7 +8,7 @@ public class Receiver {
 	public void server(){
         try {
             System.out.println("Receiver starts");
-            DatagramSocket socket = new DatagramSocket(9002);
+        	DatagramSocket socket = new DatagramSocket(9002);
             DatagramSocket ACK_socket = new DatagramSocket();
             while(true){ 
                 byte[] buf = new byte[2048];
@@ -32,7 +32,6 @@ public class Receiver {
             
         }
     }
-    
     public static void main(String[] args) {
         new Thread(){
             @Override
@@ -42,6 +41,4 @@ public class Receiver {
             }
         }.start();
     }
-
-
 }
