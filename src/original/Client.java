@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class Client {
 
-	public static final String serverIP = "192.168.202.20" ; //"13.233.125.32";
+	public static final String serverIP = "13.233.122.179" ; //"13.233.125.32";
 	public static final int serverListeningPort = 9001;
 	public static String netIP = "192.168.202.20";
 	
@@ -35,10 +35,10 @@ public class Client {
 					connectionBuildSocket = new DatagramSocket();
 				//netIP = getV4IP();
 					System.out.println("netIP is : " + netIP);
-					for (int i = 0; i < 5; i++) {
+					for (int i = 0; i < 10; i++) {
 						packetsender.sendPacket(-1, 0, 0, 0, netIP, connectionBuildSocket, serverIP, serverListeningPort);
 						try {
-							Thread.sleep(10);
+							Thread.sleep(100);
 						} catch (Exception e) {
 							System.exit(0);
 						}

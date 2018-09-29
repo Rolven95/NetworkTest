@@ -55,7 +55,7 @@ public class Server {
         	DatagramSocket socket = new DatagramSocket();
         	int seq = 0;
         	String tempLocalIP = localIp;
-        	while(seq < 5) {
+        	while(seq < 1000) {
         		unicast_packet to_sent = new unicast_packet();
         		to_sent.setSeq(seq);
         		to_sent.setDeparture(System.currentTimeMillis());
@@ -81,6 +81,7 @@ public class Server {
                 	break;
                 }
             }
+        	//reqFlag = false; 
         } catch (Exception e) {            
             e.printStackTrace();
         }
@@ -89,14 +90,11 @@ public class Server {
         try {
             System.out.println("Server Listening Starts");
             DatagramSocket serverListeningSocket = new DatagramSocket(9001);
-            while(true){ 	
+            while(true){
             	byte[] buf = new byte[2048];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                serverListeningSocket.receive(packet);
-                
+                serverListeningSocket.receive(packet);    
                // packet.getSocketAddress()
-                
-                
                 byte[] data = packet.getData();
                 unicast_packet arrival = new unicast_packet(); 
                 arrival = arrival.bytes_to_packet(data);       //Already put received packet in :"arrival"
@@ -106,12 +104,10 @@ public class Server {
                 	System.out.println("Req received");
                 	reqFlag = true; 
                 	//reqFromIP = arrival.getFrom();
-                	
                 	reqFromIP = packet.getAddress().getHostAddress();
                 	reqFromPort=packet.getPort();
-                	
-                	System.out.println("reqIP: " + reqFromIP + "reqFromPort: " + reqFromPort );
-                	
+                	System.out.println("reqIP: " + reqFromIP + 
+                			"reqFromPort: " + reqFromPort );
                 	continue;
                 }else if(arrival.getSeq() != -1 && reqFlag) {
                 	System.out.println("receved ACK of " + arrival.getSeq());
