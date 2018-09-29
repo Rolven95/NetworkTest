@@ -15,14 +15,14 @@ import java.util.Enumeration;
 //import java.lang;
 public class unicast_packet {
 	
-	private int seq; // 
+	private int seq; //  if seq == -1, this is connection building packet
 	private long departure; 
 	private long arrival; 
 	private long processing_cost; //so fucking helpful
-	private String from = this.getIP();  
+	private String from = "";  
 	
 	//System.currentTimeMillis()
-	
+	 
 	public int getSeq() {
 		return seq;
 	}
@@ -53,32 +53,7 @@ public class unicast_packet {
 	public void setFrom(String ss) {
 		this.from = ss;
 	}
-	public String getIP(){
-
-	    try {
-	        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
-	             NetworkInterface intf = en.nextElement();
-	            for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();)
-	              {
-	                InetAddress inetAddress = enumIpAddr.nextElement();
-	                //if (!inetAddress.isLoopbackAddress() && (inetAddress instanceof Inet4Address))
-	                if (!inetAddress.isLoopbackAddress()){
-	                    //System.out.println(inetAddress.getHostAddress().toString());
-	                	if (inetAddress instanceof Inet6Address)
-	    				{
-	    					System.out.println("v6:" + inetAddress.getHostAddress());
-	    				}
-	                	return inetAddress.getHostAddress().toString();
-	                }
-	            }
-	        }
-	    }
-	    catch (SocketException ex){
-	        ex.printStackTrace();
-	    }
-	    return null;
-	}
-
+	
 	public byte[] toByteArray() throws UnknownHostException {
 		ByteBuffer buffer = ByteBuffer.allocate(32);		
 		buffer.order(ByteOrder.BIG_ENDIAN);
