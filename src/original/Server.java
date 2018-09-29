@@ -15,15 +15,15 @@ import java.util.Set;
 public class Server {
 	
 	public static boolean reqFlag = false; 
-	
 	public static String reqFromIP = "";
 	public static int reqFromPort = 0;
-	
 	public static final String localIp ="13.233.125.32";
 			//"13.233.125.32";
 	
 	public static void main(String[] args) {
+		
     	final History history = new History();
+    	//-------------------------------------------------------------------Thread 1 
     	new Thread(){
             @Override
             public void run() {
@@ -40,7 +40,7 @@ public class Server {
                 }
             }
         }.start();
-        
+        //------------------------------------------------------------------Thread 2
         new Thread(){
             @Override
             public void run() {
@@ -49,7 +49,7 @@ public class Server {
             }
         }.start();
     }
-		
+		//------------------------------------------------------------------Thread 3
     public void send(History history){
         try {
         	DatagramSocket socket = new DatagramSocket();
@@ -72,7 +72,7 @@ public class Server {
         	socket.close();
         	long start_time = System.currentTimeMillis(); 
  
-        	System.out.println("Sending done, Servise Stopped for Data Recoding");
+        	System.out.println("Sending Finished, Servise Stopped for Data Recoding");
         	while(true) {
             	if((System.currentTimeMillis()-start_time)>10000) {
                 	System.out.println("Loss Rate: " + (float)history.getLossRate() 
@@ -105,7 +105,7 @@ public class Server {
                 	reqFlag = true; 
                 	//reqFromIP = arrival.getFrom();
                 	reqFromIP = packet.getAddress().getHostAddress();
-                	reqFromPort=packet.getPort();
+                	reqFromPort = packet.getPort();
                 	System.out.println("reqIP: " + reqFromIP + 
                 			"reqFromPort: " + reqFromPort );
                 	continue;
