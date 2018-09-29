@@ -19,7 +19,7 @@ public class Server {
 	public static String reqFromIP = "";
 	public static int reqFromPort = 0;
 	
-	public static final String localIp ="192.168.202.20";
+	public static final String localIp ="13.233.125.32";
 			//"13.233.125.32";
 	
 	public static void main(String[] args) {
@@ -93,6 +93,10 @@ public class Server {
             	byte[] buf = new byte[2048];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 serverListeningSocket.receive(packet);
+                
+               // packet.getSocketAddress()
+                
+                
                 byte[] data = packet.getData();
                 unicast_packet arrival = new unicast_packet(); 
                 arrival = arrival.bytes_to_packet(data);       //Already put received packet in :"arrival"
