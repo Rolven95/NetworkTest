@@ -17,7 +17,7 @@ public class Server {
 	public static boolean reqFlag = false; 
 	public static String reqFromIP = "";
 	public static int reqFromPort = 0;
-	public static final String localIp ="13.233.125.32";
+	//public static final String localIp ="13.233.125.32";
 			//"13.233.125.32";
 	
 	public static void main(String[] args) {
@@ -34,6 +34,11 @@ public class Server {
                 		s.send(history);
                 		break;
                 	}else {
+                		try {
+        					Thread.sleep(1000);
+        				} catch (Exception e) {
+        					System.exit(0);
+        				}
                 		System.out.println("req == false");
                 		continue;
                 	}
@@ -54,12 +59,17 @@ public class Server {
         try {
         	DatagramSocket socket = new DatagramSocket();
         	int seq = 0;
-        	String tempLocalIP = localIp;
+        	//String tempLocalIP = localIp;
+        	try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+				System.exit(0);
+			}
         	while(seq < 1000) {
         		unicast_packet to_sent = new unicast_packet();
         		to_sent.setSeq(seq);
         		to_sent.setDeparture(System.currentTimeMillis());
-        		to_sent.setFrom(tempLocalIP);
+        		to_sent.setFrom("0");
         		//System.out.println( localIp);
         		history.insert_sent(to_sent);       
         		byte[] buf = to_sent.toByteArray();
@@ -68,6 +78,11 @@ public class Server {
         		socket.send(packet);
         		System.out.println( seq +" sent");
         		seq++;
+        		try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+					System.exit(0);
+				}
             }
         	socket.close();
         	long start_time = System.currentTimeMillis(); 
@@ -119,9 +134,7 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-	
-    
+    }    
     static class History {
     	ArrayList <unicast_packet> sent_history = new ArrayList<unicast_packet>(); 
     	ArrayList <unicast_packet> ACK_history = new ArrayList<unicast_packet>(); 
