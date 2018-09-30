@@ -1,23 +1,28 @@
 package original;
 
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
 
 //import java.lang;
 public class unicast_packet {
 	
-	private int seq; // 
+	private int seq; //  if seq == -1, this is connection building packet
 	private long departure; 
 	private long arrival; 
 	private long processing_cost; //so fucking helpful
-	private String from;  
+	private String from = "";  
 	
 	//System.currentTimeMillis()
-	
+	 
 	public int getSeq() {
 		return seq;
 	}
