@@ -76,7 +76,7 @@ public class Server {
         		DatagramPacket packet = new DatagramPacket(buf, buf.length,
             		InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
         		socket.send(packet);
-        		System.out.println( seq +" sent");
+        		System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
         		seq++;
         		try {
 					Thread.sleep(100);
@@ -119,10 +119,11 @@ public class Server {
                 	System.out.println("Req received");
                 	reqFlag = true; 
                 	//reqFromIP = arrival.getFrom();
-                	reqFromIP = packet.getAddress().getHostAddress();
+                	reqFromIP = packet.getAddress().toString().substring(1); // ??????????????????????????????????????????????????????????????
+                			//.getHostAddress();
                 	reqFromPort = packet.getPort();
                 	System.out.println("reqIP: " + reqFromIP + 
-                			"reqFromPort: " + reqFromPort );
+                			" reqFromPort: " + reqFromPort );
                 	continue;
                 }else if(arrival.getSeq() != -1 && reqFlag) {
                 	System.out.println("receved ACK of " + arrival.getSeq());

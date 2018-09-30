@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 
 public class Client {
 
-	//public static final String serverIP = "13.233.122.179" ; //"13.233.125.32";
-	public static final String serverIP = "192.168.202.191" ;
+	public static final String serverIP = "13.233.122.179" ; //"13.233.125.32";
+	//public static final String serverIP = "192.168.202.20" ;
 	public static final int serverListeningPort = 9001;
 	public static DatagramSocket connectionBuildSocket;
 	public static int localPort; 
@@ -42,14 +42,10 @@ public class Client {
 		new Thread() {
 			public void run() {
 				PacketSender packetsender = new PacketSender();
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 1000; i++) {
 					packetsender.sendPacket(-1, 0, 0, 0, "0", 
 							connectionBuildSocket, serverIP, serverListeningPort);
-					try {
-						Thread.sleep(100);
-					} catch (Exception e) {
-						System.exit(0);
-					}
+					
 				}
 				//connectionBuildSocket.close();
 				System.out.println("Req sent."); 
