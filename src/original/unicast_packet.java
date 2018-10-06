@@ -1,6 +1,8 @@
 package original;
 
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -15,10 +17,10 @@ import java.util.Enumeration;
 //import java.lang;
 public class unicast_packet {
 	
-	private int seq; //  if seq == -1, this is connection building packet
-	private long departure; 
-	private long arrival; 
-	private long processing_cost; //so fucking helpful
+	private int seq = -2; //  if seq == -1, this is connection building packet
+	private long departure = 0; 
+	private long arrival = 0; 
+	private long processing_cost = 0; //so fucking helpful
 	private String from = "";  
 	
 	//System.currentTimeMillis()
@@ -109,5 +111,19 @@ public class unicast_packet {
 		
 		return result; 
 	}
-
+	
+	public void sendThisPacket(unicast_packet to_sent, DatagramSocket socket, String targetIP, int port){
+		try {
+            byte[] buf = to_sent.toByteArray();
+            DatagramPacket packet = new DatagramPacket(buf, buf.length,
+            		InetAddress.getByName(targetIP), port); 
+            socket.send(packet);
+            System.out.println( seq +" sent");
+        	//return to_sent;
+        	
+        } catch (Exception e) {            
+            e.printStackTrace();
+        }
+        //return null;
+	}
 }

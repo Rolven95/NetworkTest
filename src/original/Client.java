@@ -26,26 +26,19 @@ public class Client {
 	public static DatagramSocket connectionBuildSocket;
 	public static int localPort; 
 	public static String localIP;
-	//public static String netIP = "192.168.202.20";
-		public static void main(String[] args) throws Exception {
-			
-			connectionBuildSocket = new DatagramSocket(5001);
-			localPort = connectionBuildSocket.getLocalPort();
-			//localIP = connectionBuildSocket.getLocalAddress().toString();
-			
-			//System.out.println("getlocalPort: "+ localPort
-			//	+  " localIP: " + localIP 
-			//	+  " getPort(): " + connectionBuildSocket.getPort()
-			//	+  " getInetAddress: " + connectionBuildSocket.getInetAddress()
-			//		);
-
+	
+	public static void main(String[] args) throws Exception {
+		connectionBuildSocket = new DatagramSocket();          //local listening port
+		localPort = connectionBuildSocket.getLocalPort();
+		
 		new Thread() {
 			public void run() {
-				PacketSender packetsender = new PacketSender();
-				for (int i = 0; i < 1000; i++) {
-					packetsender.sendPacket(-1, 0, 0, 0, "0", 
-							connectionBuildSocket, serverIP, serverListeningPort);
-					
+				
+				
+				for (int i = 0; i < 10; i++) {
+					unicast_packet toSent = new unicast_packet();
+					toSent.setSeq(-1);
+					toSent.sendThisPacket(toSent, connectionBuildSocket, serverIP, serverListeningPort); 
 				}
 				//connectionBuildSocket.close();
 				System.out.println("Req sent."); 
