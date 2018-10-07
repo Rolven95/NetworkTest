@@ -36,7 +36,7 @@ public class Client {
 				
 				
 				for (int i = 0; i < 10; i++) {
-					unicast_packet toSent = new unicast_packet();
+					unicast_packet toSent = new unicast_packet(0,0,0,0,"");
 					toSent.setSeq(-1);
 					toSent.sendThisPacket(toSent, connectionBuildSocket, serverIP, serverListeningPort); 
 				}
@@ -66,7 +66,7 @@ public class Client {
 				connectionBuildSocket.receive(packet);
 				long cost1 = System.currentTimeMillis();
 				byte[] data = packet.getData();
-				unicast_packet arrival = new unicast_packet();
+				unicast_packet arrival = new unicast_packet(0,0,0,0,"");
 				arrival = arrival.bytes_to_packet(data);
 				// System.out.println("receved " + arrival.getSeq()+ " dep = " +
 				// arrival.getdeparture());

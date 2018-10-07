@@ -17,13 +17,19 @@ import java.util.Enumeration;
 //import java.lang;
 public class unicast_packet {
 	
-	private int seq = -2; //  if seq == -1, this is connection building packet
-	private long departure = 0; 
-	private long arrival = 0; 
-	private long processing_cost = 0; //so fucking helpful
-	private String from = "";  
+	private int seq; //  if seq == -1, this is connection building packet
+	private long departure; 
+	private long arrival; 
+	private long processing_cost; //so fucking helpful
+	private String from;  
 	
-	//System.currentTimeMillis()
+	public unicast_packet(int s, long d, long a, long p, String f) {
+		seq = s;
+		departure = d;
+		arrival = a;
+		processing_cost = p;
+		from = f;
+	}
 	 
 	public int getSeq() {
 		return seq;
@@ -90,7 +96,8 @@ public class unicast_packet {
     }
 	
 	public unicast_packet bytes_to_packet (byte[] input) {
-		unicast_packet result = new unicast_packet();
+		
+		unicast_packet result = new unicast_packet( 0,0,0,0,"");
 		
 		int seq  = input[3] & 0xFF;
         seq |= ((input[2] << 8) & 0xFF00);

@@ -66,7 +66,7 @@ public class Server {
 				System.exit(0);
 			}
         	while(seq < 1000) {
-        		unicast_packet to_sent = new unicast_packet();
+        		unicast_packet to_sent = new unicast_packet(0,0,0,0,"");
         		to_sent.setSeq(seq);
         		to_sent.setDeparture(System.currentTimeMillis());
         		to_sent.setFrom("0");
@@ -111,7 +111,7 @@ public class Server {
                 serverListeningSocket.receive(packet);    
                // packet.getSocketAddress()
                 byte[] data = packet.getData();
-                unicast_packet arrival = new unicast_packet(); 
+                unicast_packet arrival = new unicast_packet(0,0,0,0,""); 
                 arrival = arrival.bytes_to_packet(data);       //Already put received packet in :"arrival"
                 arrival.setArrival(System.currentTimeMillis());
                 
