@@ -71,18 +71,22 @@ public class NewClient {
 						}
 					}else if(arrival.getType() == 0) { // ÊÕµ½Data ·µ»ØACK
 						oneWayMode = false; 
-						System.out.println("client enter duplex mode");
+						//System.out.println("client enter duplex mode");
 						unicast_packet to_sent = arrival;
 						arrival.seType(1);
 						buf = to_sent.toByteArray();
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 								InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
-						Thread.sleep(2000); 
+						//Thread.sleep(2000); 
 						clientSocket.send(tosent);
+						System.out.println(arrival.getSeq() + " ACK sent back");
+					} else {
+						System.out.println("recieved a shit");
+						
 					}
 				}
 			
-			} catch (IOException | InterruptedException e) {
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 

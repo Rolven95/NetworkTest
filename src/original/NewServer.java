@@ -88,7 +88,7 @@ public class NewServer{
 					arrival = arrival.bytes_to_packet(data);  
 					arrival.setArrival(System.currentTimeMillis()); 
 					
-					if(arrival.getType() == -1 && !connectedToClientFlag) {//未建立连接收到req
+					if(arrival.getType() == -1 && !connectedToClientFlag) {//收到req
 						System.out.println("Req received and set connectedToClientFlag");
 						connectedToClientFlag = true; 
 						reqFromIP = packet.getAddress().toString().substring(1); // ???????
@@ -102,14 +102,13 @@ public class NewServer{
 						history.insert_ACK(arrival);      
 							
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
+						System.out.println(arrival.getSeq() + "recieved (one way mode)");
 						history.insert_oneWayHistory(arrival);
 					}else if(arrival.getType() == -2){ // 打洞成功
 						oneWayTestFlag = false; //开启双向测试模式
 						trySendBackFlag = false; //停止打洞尝试
 					}else {
-						
 						System.out.println("one packet ignored");
-						
 					}
 				}	
 			}catch(InterruptedException | IOException e){
@@ -138,41 +137,40 @@ public class NewServer{
 						
 						int uselessCounter = 0;
 						while (uselessCounter < 20 && trySendBackFlag){ // 尝试打洞回复客户端
-							
 							unicast_packet to_sent = new unicast_packet(-2);
-							
 							byte[] buf = new byte[2048];
-
 							buf = to_sent.toByteArray();
 				        	DatagramPacket packet = new DatagramPacket(buf, buf.length,
-				            	InetAddress.getByName("192.168.202.20"), reqFromPort); 
+				            	InetAddress.getByName(reqFromIP), reqFromPort); 
 				        	System.out.println("Trying to reply to:"+InetAddress.getByName(reqFromIP) 
 				        	+ " at "+ reqFromPort);
-				        	serverRecieveSocket.send(packet);
+				        	serverRecieveSocket.send(packet); /////////////////////do not send
 				        	uselessCounter ++ ;
 				        	Thread.sleep(2);
 						}
 						trySendBackFlag = false;
-						
 						Thread.sleep(1500); // 等待客户端回应
-
+						
 					if (!oneWayTestFlag && connectedToClientFlag) { // 打洞成功，双向模式
 						System.out.println("One way mode is off, try to send packets");
+						Thread.sleep(1500);
 				        int seq = 0;
 				        while(seq < 1000) {
 				        	unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,"",0);
 				        	history.insert_sent(to_sent);       
 				        	byte[] buf = to_sent.toByteArray();
 				        	DatagramPacket packet = new DatagramPacket(buf, buf.length,
-				            	InetAddress.getByName(reqFromIP), 9002); //192.168.202.191  192.168.109.1
+				            	InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
 				        	serverRecieveSocket.send(packet);
 				        	System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
 				        	seq++;
 						}
+				        
+				        Thread.sleep(2000);
 				        connectedToClientFlag = false;
 				        oneWayTestFlag = true;
+				        System.out.println("Server sent finished.");
 				      }else {
-				    	  
 				    	  System.out.println("enter one way mode");
 				      }
 					}
