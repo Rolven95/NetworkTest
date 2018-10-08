@@ -79,7 +79,7 @@ public class NewServer{
 				System.out.println("Server Listening at port: " + serverRecieveSocket.getLocalPort());
 				
 				while(true){
-					byte[] buf = new byte[65507]; // The maximum size of UDP
+					byte[] buf = new byte[2048]; // The maximum size of UDP
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					serverRecieveSocket.receive(packet);    
 					// packet.getSocketAddress()
@@ -138,16 +138,19 @@ public class NewServer{
 						
 						int uselessCounter = 0;
 						while (uselessCounter < 20 && trySendBackFlag){ // 尝试打洞回复客户端
-							System.out.println("Trying to reply client");
+							
 							unicast_packet to_sent = new unicast_packet(-2);
 							
-							byte[] buf = new byte[65507];
+							byte[] buf = new byte[2048];
 
 							buf = to_sent.toByteArray();
 				        	DatagramPacket packet = new DatagramPacket(buf, buf.length,
-				            	InetAddress.getByName(reqFromIP), reqFromPort); 
+				            	InetAddress.getByName("192.168.202.20"), reqFromPort); 
+				        	System.out.println("Trying to reply to:"+InetAddress.getByName(reqFromIP) 
+				        	+ " at "+ reqFromPort);
+				        	serverRecieveSocket.send(packet);
 				        	uselessCounter ++ ;
-				        	Thread.sleep(5);
+				        	Thread.sleep(2);
 						}
 						trySendBackFlag = false;
 						
@@ -161,11 +164,13 @@ public class NewServer{
 				        	history.insert_sent(to_sent);       
 				        	byte[] buf = to_sent.toByteArray();
 				        	DatagramPacket packet = new DatagramPacket(buf, buf.length,
-				            	InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
+				            	InetAddress.getByName(reqFromIP), 9002); //192.168.202.191  192.168.109.1
 				        	serverRecieveSocket.send(packet);
 				        	System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
 				        	seq++;
 						}
+				        connectedToClientFlag = false;
+				        oneWayTestFlag = true;
 				      }else {
 				    	  
 				    	  System.out.println("enter one way mode");

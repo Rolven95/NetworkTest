@@ -27,9 +27,9 @@ public class NewClient {
 	//public static boolean reqSentFlag = false;
 	public static void main(String[] args) throws Exception {
 		
-		clientSocket = new DatagramSocket();
+		clientSocket = new DatagramSocket(9002);
 		localPort = clientSocket.getLocalPort();
-		localIP = clientSocket.getLocalAddress().toString();
+		localIP = InetAddress.getLocalHost().getHostAddress().toString();
 		
 		ExecutorService exec = Executors.newCachedThreadPool(); 
 		Thread thread1=new Thread(new ClientReciever());
@@ -38,7 +38,6 @@ public class NewClient {
 		exec.execute(thread1);
 		exec.execute(thread2);
 		exec.shutdown();
-		
 	}
 		
 	static class ClientReciever implements Runnable{
@@ -46,30 +45,44 @@ public class NewClient {
 		public void run() {
 			try {
 				System.out.println("Clilent listener Online");
-				byte[] buf = new byte[65507]; // The maxium size of UDP
-				DatagramPacket packet = new DatagramPacket(buf, buf.length);
-				clientSocket.receive(packet);
-				byte[] data = packet.getData();
-				unicast_packet arrival = new unicast_packet(); 
-				arrival = arrival.bytes_to_packet(data);
+				System.out.println("Client listening at: "+ localIP 
+									+ " : "+ localPort);
+				while(true) {
+					byte[] buf = new byte[2048]; // The maxium size of UDP
+					DatagramPacket packet = new DatagramPacket(buf, buf.length);
+					clientSocket.receive(packet);
+				
+					byte[] data = packet.getData();
+					unicast_packet arrival = new unicast_packet(); 
+					arrival = arrival.bytes_to_packet(data);
 			
-				if(arrival.getType() == -2) {//服务端收到req 返回打洞尝试
-					oneWayMode = false; 
-					System.out.println("enter duplex mode");
-				
-				}else if(arrival.getType() == 0) { // 收到Data 返回ACK
-					oneWayMode = false; 
-					System.out.println("enter duplex mode");
-					unicast_packet to_sent = arrival;
-					arrival.seType(1);
-					buf = to_sent.toByteArray();
-					DatagramPacket tosent = new DatagramPacket(buf, buf.length,
-	        			InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
-					clientSocket.send(tosent);
-				
+					if(arrival.getType() == -2) {//服务端收到req 返回打洞尝试
+						oneWayMode = false; 
+						System.out.println("client in duplex mode");
+						for(int i = 0 ;i < 5 ; i++){
+							//byte[] buf = new byte[2048];
+							unicast_packet to_sent = new unicast_packet(-2);
+							//System.out.println("clent type = " + to_sent.getType());
+							buf = to_sent.toByteArray();
+							System.out.println("dup notif sent to  " + serverIP +":" + serverPort);
+							DatagramPacket tosent = new DatagramPacket(buf, buf.length,
+									InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
+							clientSocket.send(tosent);
+						}
+					}else if(arrival.getType() == 0) { // 收到Data 返回ACK
+						oneWayMode = false; 
+						System.out.println("client enter duplex mode");
+						unicast_packet to_sent = arrival;
+						arrival.seType(1);
+						buf = to_sent.toByteArray();
+						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
+								InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
+						Thread.sleep(2000); 
+						clientSocket.send(tosent);
+					}
 				}
 			
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
@@ -82,9 +95,9 @@ public class NewClient {
 			try {
 				if (!reqSentFlag) {
 					for(int i = 0 ;i < 5 ; i++){
-						byte[] buf = new byte[65507];
+						byte[] buf = new byte[2048];
 						unicast_packet to_sent = new unicast_packet(-1, -1);
-						System.out.println("clent type = " + to_sent.getType());
+						//System.out.println("clent type = " + to_sent.getType());
 						buf = to_sent.toByteArray();
 						System.out.println("req sent to " + serverIP +" at " + serverPort);
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
@@ -96,8 +109,9 @@ public class NewClient {
 				Thread.sleep(2000);	
 				
 				if(oneWayMode) {
+					System.out.println("entered one way mode, start send shit to server");
 					for(int i = 0 ;i<1000 ; i++){
-						byte[] buf = new byte[65507];
+						byte[] buf = new byte[2048];
 						unicast_packet to_sent = new unicast_packet(i,0);
 						buf = to_sent.toByteArray();
 						System.out.println(i + " sent to " + serverIP +" at " + serverPort);
