@@ -17,18 +17,34 @@ import java.util.Enumeration;
 //import java.lang;
 public class unicast_packet {
 	
-	private int seq; //  if seq == -1, this is connection building packet
-	private long departure; 
-	private long arrival; 
-	private long processing_cost; //so fucking helpful
-	private String from;  
+	private int seq = 0; //  if seq == -1, this is connection building packet
+	private int type= 0 ;
+	private long departure = 0 ; 
+	private long arrival= 0 ; 
+	private long processing_cost= 0 ; //so fucking helpful
+	private String from = "";  
 	
-	public unicast_packet(int s, long d, long a, long p, String f) {
+	
+	public unicast_packet() {
+		
+	}
+	public unicast_packet(int t) {
+		
+		type = t;
+		
+	}
+	public unicast_packet(int s, int t) {
+		seq = s;
+		type = t;
+	}
+	
+	public unicast_packet(int s, long d, long a, long p, String f, int t) {
 		seq = s;
 		departure = d;
 		arrival = a;
 		processing_cost = p;
 		from = f;
+		type = t;
 	}
 	 
 	public int getSeq() {
@@ -61,22 +77,32 @@ public class unicast_packet {
 	public void setFrom(String ss) {
 		this.from = ss;
 	}
-	
+	public int getType() {
+		return type;
+	}
+	public void seType(int p) {
+		this.type = p;
+	}
 	public byte[] toByteArray() throws UnknownHostException {
-		ByteBuffer buffer = ByteBuffer.allocate(32);		
+		ByteBuffer buffer = ByteBuffer.allocate(36);		
 		buffer.order(ByteOrder.BIG_ENDIAN);
+		
 		buffer.putInt(this.seq);	    	  // 4bytes 0-3
-		buffer.putLong(this.departure); 	  // 8bytes 4-11
-		buffer.putLong(this.arrival);    	  // 8bytes 12-19
-		buffer.putLong(this.processing_cost); // 8bytes 20-27
-		byte ip_in_bytes[] = InetAddress.getByName(this.from).getAddress();
+		buffer.putInt(this.type); // 32 33 34 35
+		
+		buffer.putLong(this.departure); 	  // 8bytes 4-11 +4
+		buffer.putLong(this.arrival);    	  // 8bytes 12-19 +4
+		buffer.putLong(this.processing_cost); // 8bytes 20-27 +4
+		byte ip_in_bytes[] = InetAddress.getByName(this.from).getAddress(); //+4
 		buffer.put(ip_in_bytes[0]);
 		buffer.put(ip_in_bytes[1]);
 		buffer.put(ip_in_bytes[2]);
 		buffer.put(ip_in_bytes[3]);
+		
+		//System.out.println("");
 		byte[] bytes = buffer.array();	
 		
-		//for(int i = 0; i<32 ; i++) {
+		//for(int i = 0; i<36 ; i++) {
 		//	System.out.println("all["+ i +"] =  "+ bytes[i]);
 		//}
 		
@@ -97,25 +123,32 @@ public class unicast_packet {
 	
 	public unicast_packet bytes_to_packet (byte[] input) {
 		
-		unicast_packet result = new unicast_packet( 0,0,0,0,"");
+		unicast_packet result = new unicast_packet();
 		
 		int seq  = input[3] & 0xFF;
         seq |= ((input[2] << 8) & 0xFF00);
         seq |= ((input[1] << 16) & 0xFF0000);
         seq |= ((input[0] << 24) & 0xFF000000);
         
-        long dep = longFrom8Bytes(input, 4, false);
-        long cost = longFrom8Bytes(input, 20, false);
+        int temtype  = input[7] & 0xFF;
+        temtype |= ((input[6] << 8) & 0xFF00);
+        temtype |= ((input[5] << 16) & 0xFF0000);
+        temtype |= ((input[4] << 24) & 0xFF000000);
         
-        String from_addr = (input[28] & 0xff) 
-        		+ "." + (input[29] & 0xff) 
-        		+ "." + (input[30] & 0xff)
-        		+ "." + (input[31] & 0xff);  
+        long dep = longFrom8Bytes(input, 4+4, false);
+        long cost = longFrom8Bytes(input, 20+4, false);
+        
+        
+        String from_addr = (input[28+4] & 0xff) 
+        		+ "." + (input[29+4] & 0xff) 
+        		+ "." + (input[30+4] & 0xff)
+        		+ "." + (input[31+4] & 0xff);  
+        
 		result.setDeparture(dep);
 		result.setProcessing_cost(cost);
 		result.setSeq(seq);
 		result.setFrom(from_addr);
-		
+		result.seType(temtype);
 		return result; 
 	}
 	
