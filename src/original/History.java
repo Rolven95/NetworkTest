@@ -3,10 +3,19 @@ package original;
 import java.util.ArrayList;
 
 public class History {
+		public int id = 0;
     	ArrayList <unicast_packet> sent_history = new ArrayList<unicast_packet>(); 
     	ArrayList <unicast_packet> ACK_history = new ArrayList<unicast_packet>(); 
     	ArrayList <unicast_packet> oneWay_history = new ArrayList<unicast_packet>(); 
     	//ArrayList<Integer> list1=new ArrayList<Integer>()
+    	
+    	public void incID(int i) {
+    		this.id ++ ;
+    	}
+    	//public 
+    	
+    	
+    	
     	
     	public synchronized void insert_sent(unicast_packet to_insert ) {
     		sent_history.add(to_insert);

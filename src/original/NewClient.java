@@ -14,14 +14,11 @@ import original.NewServer.SendThread;
 public class NewClient {
 	public static final String serverIP = "192.168.202.20" ; //"13.233.125.32";
 	public static final int serverPort = 9001;
-	//public static final String serverIP = "192.168.202.20" ;
-	//public static final int clientListeningPort = 9001;
 	
 	public static DatagramSocket clientSocket;
-	
 	public static int localPort; 
 	public static String localIP;
-	
+
 	public static boolean reqSentFlag = false;
 	public static boolean oneWayMode = true;
 	//public static boolean reqSentFlag = false;
@@ -89,7 +86,7 @@ public class NewClient {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 		}
 	}
 	
@@ -113,8 +110,8 @@ public class NewClient {
 				Thread.sleep(2000);	
 				
 				if(oneWayMode) {
-					System.out.println("entered one way mode, start send shit to server");
-					for(int i = 0 ;i<1000 ; i++){
+					System.out.println("Client sender on one way mode, start send shit to server");
+					for(int i = 0 ;i<10000 ; i++){
 						byte[] buf = new byte[2048];
 						unicast_packet to_sent = new unicast_packet(i,0);
 						buf = to_sent.toByteArray();
@@ -122,6 +119,7 @@ public class NewClient {
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 							InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
 						clientSocket.send(tosent);
+						//Thread.sleep(10);
 					}
 				}
 				

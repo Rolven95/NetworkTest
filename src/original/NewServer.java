@@ -22,7 +22,7 @@ public class NewServer{
 	public static boolean oneWayTestFlag; 
 	public static boolean sendThreadFlag; 
 	public static boolean receiveThreadFlag; 
-	
+	public static boolean oneWayTimeOutFlag;
 	public static String reqFromIP;
 	public static int reqFromPort; 
 	public static History history;
@@ -33,7 +33,8 @@ public class NewServer{
 		try {
 		connectedToClientFlag = false; 
 		trySendBackFlag = false; 
-		oneWayTestFlag = true; 
+		oneWayTestFlag = true;  // mode switch flag 
+		oneWayTimeOutFlag = false;
 		sendThreadFlag = false; 
 		receiveThreadFlag = false; 
 		
@@ -52,10 +53,11 @@ public class NewServer{
 		exec.execute(thread2);
 		exec.shutdown();
 		
-		//Daemon daemon=new Daemon(thread1, 3);
-		//Thread daemoThread=new Thread(daemon);
-		//daemoThread.setDaemon(true);
-		//daemoThread.start();
+		Daemon daemon=new Daemon();
+		Thread daemoThread=new Thread(daemon);
+		daemoThread.setDaemon(true);
+		daemoThread.start();
+		
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,13 +66,13 @@ public class NewServer{
 	
 
 	static class RecieveThread implements Runnable{
-		private String name;
+		private String name;                       //Useless 
 		private int time;
-		public RecieveThread(String s,int t) {
+		public RecieveThread(String s,int t) { //Useless 
 			name=s;
 			time=t;
 		}
-		public int getTime(){
+		public int getTime(){ //Useless 
 			return time;
 		}
 		public void run () {
@@ -99,10 +101,10 @@ public class NewServer{
 						//;continue
 					}else if(arrival.getType() == 1 && connectedToClientFlag && !oneWayTestFlag) { //双收ack 
 						System.out.println("receved ACK of " + arrival.getSeq());
-						history.insert_ACK(arrival);      
-							
+						history.insert_ACK(arrival);      	
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
 						System.out.println(arrival.getSeq() + "recieved (one way mode)");
+						oneWayTimeOutFlag = true ;
 						history.insert_oneWayHistory(arrival);
 					}else if(arrival.getType() == -2){ // 打洞成功
 						oneWayTestFlag = false; //开启双向测试模式
@@ -110,7 +112,7 @@ public class NewServer{
 					}else {
 						System.out.println("one packet ignored");
 					}
-				}	
+				}
 			}catch(InterruptedException | IOException e){
 					System.out.println(name+" is interrupted");
 					//TODO 
@@ -120,7 +122,7 @@ public class NewServer{
 		}
 	}
 	
-	static class SendThread implements Runnable{
+	static class SendThread implements Runnable{ 
 		private String name;
 		private int time;
 		public SendThread(String s,int t){
@@ -131,10 +133,8 @@ public class NewServer{
 			return time;
 		}
 		public void run() {
-				try {//------------------------------------------main course of this thread. 
-					
-					while (true) { // 此线程不需关闭
-						
+				try {
+					while(true){// 此线程不需关闭
 						int uselessCounter = 0;
 						while (uselessCounter < 20 && trySendBackFlag){ // 尝试打洞回复客户端
 							unicast_packet to_sent = new unicast_packet(-2);
@@ -144,15 +144,15 @@ public class NewServer{
 				            	InetAddress.getByName(reqFromIP), reqFromPort); 
 				        	System.out.println("Trying to reply to:"+InetAddress.getByName(reqFromIP) 
 				        	+ " at "+ reqFromPort);
-				        	serverRecieveSocket.send(packet); /////////////////////do not send
+				        	serverRecieveSocket.send(packet);
 				        	uselessCounter ++ ;
 				        	Thread.sleep(2);
 						}
 						trySendBackFlag = false;
-						Thread.sleep(1500); // 等待客户端回应
+						Thread.sleep(1500);//等待客户端回应
 						
-					if (!oneWayTestFlag && connectedToClientFlag) { // 打洞成功，双向模式
-						System.out.println("One way mode is off, try to send packets");
+					if (!oneWayTestFlag && connectedToClientFlag) {//打洞成功，双向模式
+						System.out.println("Sender in dup mode");
 						Thread.sleep(1500);
 				        int seq = 0;
 				        while(seq < 1000) {
@@ -169,42 +169,67 @@ public class NewServer{
 				        Thread.sleep(2000);
 				        connectedToClientFlag = false;
 				        oneWayTestFlag = true;
-				        System.out.println("Server sent finished.");
+				        System.out.println("Server dup mode finished. Start data analyzing");
+				        
+				        //TODO
+				        			        
 				      }else {
-				    	  System.out.println("enter one way mode");
+				    	  System.out.println("Sender enter one way mode");
 				      }
 					}
-					//------------------------------------------ end of this thread. 
 				}catch(InterruptedException | IOException e){
 					System.out.println(name+" is interrupted");
-					return; //注意这里如果不return的话，线程还会继续执行，所以任务超时后在这里处理结果然后返回
+					return; 
 				}
 		}
 	}
 	
 	static class Daemon implements Runnable{
-		List<Runnable> tasks=new ArrayList<Runnable>();
-		private Thread thread;
-		private int time; // The runtime of the monitored thread. But at this point only one thread could be fucked
+		//List<Runnable> tasks=new ArrayList<Runnable>();
+		//private Thread thread;
+		//private int time; // The runtime of the monitored thread. But at this point only one thread could be fucked
 		
-		public Daemon(Thread r,int t) {
-			thread=r;time=t;
-		}
-		public void addTask(Runnable r){
-				tasks.add(r);
-		}
-		
-		
+		//public Daemon(Thread r,int t) {
+		//	thread=r;time=t;
+		//}
+		//public void addTask(Runnable r){
+		//		tasks.add(r);
+		//}
+				
 		@Override
 		public void run() {
 			while(true){
 				try{
-					Thread.sleep(time*1000);
+					System.out.println("Deamon online");
+					while(true) {
+						Thread.sleep(1000);
+						System.out.println("Deamon idling");
+						if(connectedToClientFlag && oneWayTestFlag) { // connection built
+							System.out.println("Deamon find one way mode is on");
+							Thread.sleep(3000); // wait some time
+							while(oneWayTimeOutFlag) { // check one way mode flag 
+								System.out.println("Deamon oneway timeout is fine");
+								oneWayTimeOutFlag = false;
+								Thread.sleep(1000); // time out
+							}
+							System.out.println("Deamon oneway mode timeout!!!!");
+							oneWayTimeOutFlag = false ;
+							connectedToClientFlag = false;
+							//TODO
+							
+							
+							history.clearOneWayHistory();
+							System.out.println("Server: Oneway mode ended, One way timeout, connection break"
+									+ ", start data analyzing");
+							
+						}
+					
+					}					
 				}catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				System.out.println("trying to stop thread");	
-				thread.interrupt();
+				System.out.println("Deamon dead");	
+				//thread.interrupt();
 				return;
 			}
 		}
