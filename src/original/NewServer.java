@@ -98,7 +98,7 @@ public class NewServer{
 						trySendBackFlag = true;    //收到请求 尝试打洞
 						//;continue
 					}else if(arrival.getType() == 1 && connectedToClientFlag && !oneWayTestFlag) { //双收ack 
-						System.out.println("receved ACK of " + arrival.getSeq());
+						System.out.println("receved ACK of " + arrival.getSeq());//TODO
 						history.insert_ACK(arrival);      	
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
 						System.out.println(arrival.getSeq() + "recieved (one way mode)");
@@ -109,7 +109,11 @@ public class NewServer{
 						oneWayTestFlag = false; //开启双向测试模式
 						trySendBackFlag = false; //停止打洞尝试
 					}else {
-						System.out.println("one packet ignored");
+						System.out.println(" one packet ignored");
+						System.out.println(" Server ignored: " + arrival.getSeq() + " Type: " +arrival.getType()
+											+ " conntionFlag: " + connectedToClientFlag
+											+ " onewayFlag: " +  oneWayTestFlag);
+						
 					}
 				}
 			}catch(InterruptedException | IOException e){
@@ -143,7 +147,7 @@ public class NewServer{
 				            	InetAddress.getByName(reqFromIP), reqFromPort); 
 				        	System.out.println("Trying to reply to:"+InetAddress.getByName(reqFromIP) 
 				        	+ " at "+ reqFromPort);
-				        	//serverRecieveSocket.send(packet);//**************************************
+				        	serverRecieveSocket.send(packet);//**************************************
 				        	uselessCounter ++ ;
 				        	Thread.sleep(2);
 						}
@@ -154,7 +158,7 @@ public class NewServer{
 						System.out.println("Sender in dup mode");
 						Thread.sleep(1500);
 				        int seq = 0;
-				        while(seq < 1000) {
+				        while(seq < 200) {
 				        	unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,"",0);
 				        	history.insert_sent(to_sent);       
 				        	byte[] buf = to_sent.toByteArray();
@@ -193,7 +197,7 @@ public class NewServer{
 					while(true) {
 						Thread.sleep(1000);
 						System.out.println("Deamon idling");
-						if(connectedToClientFlag && oneWayTestFlag) { // connection built
+						if(connectedToClientFlag && oneWayTestFlag &&!trySendBackFlag) { // connection built
 							System.out.println("Deamon find one way mode is on");
 							Thread.sleep(3000); // wait some time
 							while(oneWayTimeOutFlag) { // check one way mode flag 
@@ -214,18 +218,13 @@ public class NewServer{
 					        			 + history.oneWay_history.get(i).getArrival() + " "
 					        			 + history.oneWay_history.get(i).getSeq() + " "
 					        			 + "\r\n");
-
 					        }
 					        //dataWriter.afterWriting();
 					        connectionID ++;
 							history.clearOneWayHistory();
 							System.out.println("Server: Oneway mode ended, One way timeout, connection break"
 									+ ", start data analyzing");
-							
-							
-
 						}
-					
 					}					
 				}catch (InterruptedException | IOException e) {
 					e.printStackTrace();
