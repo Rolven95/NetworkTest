@@ -20,9 +20,10 @@ public class NewServer{
 	public static int reqFromPort; 
 	public static History history;
 	public static DatagramSocket serverRecieveSocket;
-	
-	
-	public static void main(String[] args){
+	public static DataWriter dataWriter;
+	public static int connectionID;
+	public static String temStr = "";
+	public static void main(String[] args) throws IOException{
 		try {
 		connectedToClientFlag = false; 
 		trySendBackFlag = false; 
@@ -32,13 +33,17 @@ public class NewServer{
 		receiveThreadFlag = false; 
 		
 		reqFromIP = "";
+		
 		reqFromPort = 0; 
+		connectionID = 0;
 		history = new History();
 		
-			serverRecieveSocket = new DatagramSocket(9001);
+		dataWriter = new DataWriter("F:/","OutputData003.txt");
 		
+		serverRecieveSocket = new DatagramSocket(9001);
 		
 		ExecutorService exec = Executors.newCachedThreadPool(); 
+		
 		Thread thread1=new Thread(new RecieveThread("RecieverOne", 999));
 		Thread thread2=new Thread(new SendThread("SendThread", 999));
 		
@@ -98,6 +103,7 @@ public class NewServer{
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
 						System.out.println(arrival.getSeq() + "recieved (one way mode)");
 						oneWayTimeOutFlag = true ;
+						//arrival.setArrival(Systemcurrenttime);
 						history.insert_oneWayHistory(arrival);
 					}else if(arrival.getType() == -2){ // 打洞成功
 						oneWayTestFlag = false; //开启双向测试模式
@@ -137,7 +143,7 @@ public class NewServer{
 				            	InetAddress.getByName(reqFromIP), reqFromPort); 
 				        	System.out.println("Trying to reply to:"+InetAddress.getByName(reqFromIP) 
 				        	+ " at "+ reqFromPort);
-				        	serverRecieveSocket.send(packet);
+				        	//serverRecieveSocket.send(packet);//**************************************
 				        	uselessCounter ++ ;
 				        	Thread.sleep(2);
 						}
@@ -165,7 +171,8 @@ public class NewServer{
 				        System.out.println("Server dup mode finished. Start data analyzing");
 				        
 				        //TODO
-				        			        
+				        		
+				        connectionID ++;
 				      }else {
 				    	  System.out.println("Sender enter one way mode");
 				      }
@@ -178,17 +185,6 @@ public class NewServer{
 	}
 	
 	static class Daemon implements Runnable{
-		//List<Runnable> tasks=new ArrayList<Runnable>();
-		//private Thread thread;
-		//private int time; // The runtime of the monitored thread. But at this point only one thread could be fucked
-		
-		//public Daemon(Thread r,int t) {
-		//	thread=r;time=t;
-		//}
-		//public void addTask(Runnable r){
-		//		tasks.add(r);
-		//}
-				
 		@Override
 		public void run() {
 			while(true){
@@ -209,16 +205,29 @@ public class NewServer{
 							oneWayTimeOutFlag = false ;
 							connectedToClientFlag = false;
 							//TODO
-							
-							
+
+					        for (int i =0 ; i < history.oneWay_history.size(); i++) {
+
+					        	dataWriter.write(connectionID + " " //id 
+					        			 + 0 + " " 				//mode
+					        			 + history.oneWay_history.get(i).getdeparture() + " "
+					        			 + history.oneWay_history.get(i).getArrival() + " "
+					        			 + history.oneWay_history.get(i).getSeq() + " "
+					        			 + "\r\n");
+
+					        }
+					        //dataWriter.afterWriting();
+					        connectionID ++;
 							history.clearOneWayHistory();
 							System.out.println("Server: Oneway mode ended, One way timeout, connection break"
 									+ ", start data analyzing");
 							
+							
+
 						}
 					
 					}					
-				}catch (InterruptedException e) {
+				}catch (InterruptedException | IOException e) {
 					e.printStackTrace();
 				}
 				System.out.println("Deamon dead");	

@@ -110,6 +110,7 @@ public class NewClient {
 					for(int i = 0 ;i<10000 ; i++){
 						byte[] buf = new byte[2048];
 						unicast_packet to_sent = new unicast_packet(i,0);
+						to_sent.setDeparture(System.currentTimeMillis());
 						buf = to_sent.toByteArray();
 						System.out.println(i + " sent to " + serverIP +" at " + serverPort);
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,

@@ -15,10 +15,10 @@ import java.nio.ByteOrder;
 public class unicast_packet {
 	
 	private int seq = 0; //  if seq == -1, this is connection building packet
-	private int type= 0 ;
-	private long departure = 0 ; 
-	private long arrival= 0 ; 
-	private long processing_cost= 0 ; //so fucking helpful
+	private int type = 0;
+	private long departure = 0; 
+	private long arrival = 0; 
+	private long processing_cost = 0; //so fucking helpful
 	private String from = "";  
 	
 	
