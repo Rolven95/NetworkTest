@@ -7,17 +7,17 @@ package original;
 	import java.io.OutputStreamWriter;
 	
 	
-public class DataWriter {
-
 	
-	 
+public class DataWriter {
 	
 		public static void main(String[] args) throws IOException {
+			
 			String file="F:/stream.txt";
 			String charSet="UTF-8";
 			//写字符转换成字节流
 			FileOutputStream fileWriter=new FileOutputStream(file);
 			OutputStreamWriter writer=new OutputStreamWriter(fileWriter, charSet);
+			
 			try {
 				writer.write("测试输入字符串1");
 			} catch (Exception e) {
@@ -25,6 +25,7 @@ public class DataWriter {
 			}finally{
 				writer.close();
 			}
+			
 			//读取字节转换到字符
 			FileInputStream fileInputStream=new FileInputStream(file);
 			InputStreamReader reader=new InputStreamReader(fileInputStream, charSet);

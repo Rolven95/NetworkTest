@@ -46,10 +46,10 @@ public class History {
     	}
     	
     	public float getLossRate () {
-    		float result; 
+    		//float result; 
     		int total = sent_history.size();
     		int received = ACK_history.size(); 
-    		result = (total - received)/total; 
+    		//result = (total - received)/total; 
     		//return (double)( (double)sent_history.size() - (double)ACK_history.size()) / (double)sent_history.size(); 
     	 return (float) (total - received)/total;
     	}
