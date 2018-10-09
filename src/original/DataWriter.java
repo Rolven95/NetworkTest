@@ -1,47 +1,39 @@
 package original;
 
-	import java.io.FileOutputStream;
-	import java.io.FileInputStream;
-	import java.io.IOException;
-	import java.io.InputStreamReader;
-	import java.io.OutputStreamWriter;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 	
 	
 	
 public class DataWriter {
-	
-		public static void main(String[] args) throws IOException {
+			public static BufferedOutputStream Buff = null;
+			public static FileOutputStream fileStrm = null;
+			public static String path = "";
+			public static String fileName = "";
+			public static File file;
 			
-			String file="F:/stream.txt";
-			String charSet="UTF-8";
-			//Ð´×Ö·û×ª»»³É×Ö½ÚÁ÷
-			FileOutputStream fileWriter=new FileOutputStream(file);
-			OutputStreamWriter writer=new OutputStreamWriter(fileWriter, charSet);
-			
-			try {
-				writer.write("²âÊÔÊäÈë×Ö·û´®1");
-			} catch (Exception e) {
-				// TODO: handle exception
-			}finally{
-				writer.close();
-			}
-			
-			//¶ÁÈ¡×Ö½Ú×ª»»µ½×Ö·û
-			FileInputStream fileInputStream=new FileInputStream(file);
-			InputStreamReader reader=new InputStreamReader(fileInputStream, charSet);
-			StringBuilder builder=new StringBuilder();
-			char [] buf=new char[64];
-			int count=0;
-			try {
-				while ((count = reader.read(buf)) != -1) {
-					builder.append(buf,0,count);
+			public DataWriter(String pa , String fi) throws IOException{
+				
+				path = pa;
+				fileName = fi;
+				file = new File(path+fileName);
+				if(!file.exists()){
+					file.createNewFile();
+					System.out.println("New file created");
+				}else {
+					System.out.println("File already exist");
 				}
-			} catch (Exception e) {
-				// TODO: handle exception
-			}finally{
-				reader.close();
+				fileStrm = new FileOutputStream(file, true);
+				dataWriter("Test\r\n");
 			}
-			System.out.println(builder.toString());
-		}
+			public static boolean dataWriter( String c) throws IOException {
+	            Buff = new BufferedOutputStream(fileStrm);
+	            Buff.write(c.getBytes()); 
+	            Buff.flush();
+	            Buff.close();
+				return false;
+			}
 	}
 
