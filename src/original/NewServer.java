@@ -98,8 +98,9 @@ public class NewServer{
 						trySendBackFlag = true;    //收到请求 尝试打洞
 						//;continue
 					}else if(arrival.getType() == 1 && connectedToClientFlag && !oneWayTestFlag) { //双收ack 
-						System.out.println("receved ACK of " + arrival.getSeq());//TODO
-						history.insert_ACK(arrival);      	
+						System.out.println("receved ACK of " + arrival.getSeq());//
+						arrival.setNakArrival(System.currentTimeMillis());
+						history.insert_ACK(arrival);
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
 						System.out.println(arrival.getSeq() + "recieved (one way mode)");
 						oneWayTimeOutFlag = true ;
@@ -113,13 +114,11 @@ public class NewServer{
 						System.out.println(" Server ignored: " + arrival.getSeq() + " Type: " +arrival.getType()
 											+ " conntionFlag: " + connectedToClientFlag
 											+ " onewayFlag: " +  oneWayTestFlag);
-						
 					}
 				}
 			}catch(InterruptedException | IOException e){
 					System.out.println(name+" is interrupted");
-					//TODO 
-					//add data analysis
+					
 					return; //注意这里如果不return的话，线程还会继续执行，所以任务超时后在这里处理结果然后返回
 			}
 		}
@@ -137,7 +136,7 @@ public class NewServer{
 		}
 		public void run() {
 				try {
-					while(true){// 此线程不需关闭
+					while(true){//此线程不需关闭
 						int uselessCounter = 0;
 						while (uselessCounter < 20 && trySendBackFlag){ // 尝试打洞回复客户端
 							unicast_packet to_sent = new unicast_packet(-2);
@@ -154,8 +153,8 @@ public class NewServer{
 						trySendBackFlag = false;
 						Thread.sleep(1500);//等待客户端回应
 						
-					if (!oneWayTestFlag && connectedToClientFlag) {//打洞成功，双向模式
-						System.out.println("Sender in dup mode");
+					if (!oneWayTestFlag && connectedToClientFlag) {//打洞成功，双向模式，开始发包
+						System.out.println("Server: Sender in dup mode");
 						Thread.sleep(1500);
 				        int seq = 0;
 				        while(seq < 200) {
@@ -169,13 +168,25 @@ public class NewServer{
 				        	seq++;
 						}
 				        
-				        Thread.sleep(2000);
+				        Thread.sleep(2000); //双向包发送完毕 等待结束
 				        connectedToClientFlag = false;
 				        oneWayTestFlag = true;
 				        System.out.println("Server dup mode finished. Start data analyzing");
-				        
 				        //TODO
-				        		
+				        for (int i =0 ; i < history.ACK_history.size(); i++) {
+				        	dataWriter.write(connectionID + " " //id 
+				        			 + 1 + " " 				//mode
+				        			 + history.ACK_history.get(i).getdeparture() + " "
+				        			 + history.ACK_history.get(i).getArrival() + " "
+				        			 + history.ACK_history.get(i).getNakArrival() + " "
+				        			 + history.ACK_history.get(i).getSeq() + " "
+				        			 + "\r\n");
+				        }
+				        
+				        history.ACK_history.clear();
+				        history.sent_history.clear();
+				        history.oneWay_history.clear(); //just in case
+				        System.out.println("Server: Data output done, history cleared, connection id:" + connectionID);
 				        connectionID ++;
 				      }else {
 				    	  System.out.println("Sender enter one way mode");
@@ -201,17 +212,17 @@ public class NewServer{
 							System.out.println("Deamon find one way mode is on");
 							Thread.sleep(3000); // wait some time
 							while(oneWayTimeOutFlag) { // check one way mode flag 
-								System.out.println("Deamon oneway timeout is fine");
+								System.out.println("Deamon: oneway running");
 								oneWayTimeOutFlag = false;
 								Thread.sleep(1000); // time out
 							}
-							System.out.println("Deamon oneway mode timeout!!!!");
+							System.out.println("Deamon： Server oneway timeout!!!!");
 							oneWayTimeOutFlag = false ;
 							connectedToClientFlag = false;
 							//TODO
-
+							System.out.println("Server: Oneway mode ended, One way timeout, connection break"
+									+ ", start data analyzing");
 					        for (int i =0 ; i < history.oneWay_history.size(); i++) {
-
 					        	dataWriter.write(connectionID + " " //id 
 					        			 + 0 + " " 				//mode
 					        			 + history.oneWay_history.get(i).getdeparture() + " "
@@ -221,9 +232,12 @@ public class NewServer{
 					        }
 					        //dataWriter.afterWriting();
 					        connectionID ++;
-							history.clearOneWayHistory();
-							System.out.println("Server: Oneway mode ended, One way timeout, connection break"
-									+ ", start data analyzing");
+							//history.clearOneWayHistory();
+							history.ACK_history.clear();
+							history.sent_history.clear();
+							history.oneWay_history.clear();
+							
+							System.out.println("Server: Data output done, all history cleared, connection id:" + connectionID);
 						}
 					}					
 				}catch (InterruptedException | IOException e) {

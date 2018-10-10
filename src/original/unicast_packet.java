@@ -15,12 +15,12 @@ import java.nio.ByteOrder;
 public class unicast_packet {
 	
 	private int seq = 0; //  if seq == -1, this is connection building packet
-	private int type = 0;
+	
 	private long departure = 0; 
 	private long arrival = 0; 
-	private long processing_cost = 0; //so fucking helpful
+	private long nakArrival = 0; //so fucking helpful
 	private String from = "";  
-	
+	private int type = 0;
 	
 	public unicast_packet() {
 		
@@ -39,7 +39,7 @@ public class unicast_packet {
 		seq = s;
 		departure = d;
 		arrival = a;
-		processing_cost = p;
+		nakArrival = p;
 		from = f;
 		type = t;
 	}
@@ -62,11 +62,11 @@ public class unicast_packet {
 	public void setArrival(long r) {
 		this.arrival = r;
 	}
-	public long getProcessing_cost() {
-		return processing_cost;
+	public long getNakArrival() {
+		return nakArrival;
 	}
-	public void setProcessing_cost(long re) {
-		this.processing_cost = re;
+	public void setNakArrival(long re) {
+		this.nakArrival = re;
 	}
 	public String getFrom() {
 		return from;
@@ -89,7 +89,7 @@ public class unicast_packet {
 		
 		buffer.putLong(this.departure); 	  // 8bytes 4-11 +4
 		buffer.putLong(this.arrival);    	  // 8bytes 12-19 +4
-		buffer.putLong(this.processing_cost); // 8bytes 20-27 +4
+		buffer.putLong(this.nakArrival); // 8bytes 20-27 +4
 		byte ip_in_bytes[] = InetAddress.getByName(this.from).getAddress(); //+4
 		buffer.put(ip_in_bytes[0]);
 		buffer.put(ip_in_bytes[1]);
@@ -142,7 +142,7 @@ public class unicast_packet {
         		+ "." + (input[31+4] & 0xff);  
         
 		result.setDeparture(dep);
-		result.setProcessing_cost(cost);
+		result.setNakArrival(cost);
 		result.setSeq(seq);
 		result.setFrom(from_addr);
 		result.seType(temtype);

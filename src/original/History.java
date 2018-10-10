@@ -61,7 +61,7 @@ public class History {
     				if( this.sent_history.get(i).getSeq() == this.ACK_history.get(q).getSeq() ) {
     					
     					totalRTT +=  this.ACK_history.get(q).getArrival() 
-    								- this.ACK_history.get(q).getProcessing_cost() 
+    								- this.ACK_history.get(q).getNakArrival() 
     								- this.ACK_history.get(q).getdeparture();
     				}
     			}
@@ -77,7 +77,7 @@ public class History {
     				if( this.sent_history.get(i).getSeq() == this.ACK_history.get(q).getSeq() ) {
     					
     					bigfuck +=  Math.pow((this.ACK_history.get(q).getArrival() 
-    							- this.ACK_history.get(q).getProcessing_cost() 
+    							- this.ACK_history.get(q).getNakArrival() 
     							- this.ACK_history.get(q).getdeparture()-averageRTT),2);
     				}
     			}
