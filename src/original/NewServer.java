@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewServer{
+	
 	public static final int packetLength = 512;
 	public static boolean connectedToClientFlag; 
 	public static boolean trySendBackFlag; 
@@ -23,6 +24,7 @@ public class NewServer{
 	public static DataWriter dataWriter;
 	public static int connectionID;
 	public static String temStr = "";
+	
 	public static void main(String[] args) throws IOException{
 		try {
 		connectedToClientFlag = false; 
@@ -31,14 +33,12 @@ public class NewServer{
 		oneWayTimeOutFlag = false;
 		sendThreadFlag = false; 
 		receiveThreadFlag = false; 
-		
 		reqFromIP = "";
-		
 		reqFromPort = 0; 
 		connectionID = 0;
 		history = new History();
 		
-		dataWriter = new DataWriter("F:/","Demo00.txt");
+		dataWriter = new DataWriter("/home/ec2-user/","DemoX.txt");
 		
 		serverRecieveSocket = new DatagramSocket(9001);
 		
@@ -85,7 +85,7 @@ public class NewServer{
 					byte[] data = packet.getData();
 					unicast_packet arrival = new unicast_packet(); 
 					arrival = arrival.bytes_to_packet(data);  
-					arrival.setArrival(System.currentTimeMillis()); 
+					//
 					
 					if(arrival.getType() == -1 && !connectedToClientFlag) {//收到req
 						System.out.println("Req received and set connectedToClientFlag");
@@ -102,6 +102,7 @@ public class NewServer{
 						history.insert_ACK(arrival);
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
 						System.out.println(arrival.getSeq() + "recieved (one way mode)");
+						arrival.setArrival(System.currentTimeMillis()); 
 						oneWayTimeOutFlag = true ;
 						//arrival.setArrival(Systemcurrenttime);
 						history.insert_oneWayHistory(arrival);
