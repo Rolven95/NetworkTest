@@ -38,7 +38,7 @@ public class NewServer{
 		connectionID = 0;
 		history = new History();
 		
-		dataWriter = new DataWriter("F:/","OutputData003.txt");
+		dataWriter = new DataWriter("F:/","Demo00.txt");
 		
 		serverRecieveSocket = new DatagramSocket(9001);
 		
@@ -62,7 +62,6 @@ public class NewServer{
 		}
 	}
 	
-
 	static class RecieveThread implements Runnable{
 		private String name;                       //Useless 
 		private int time;
@@ -156,24 +155,31 @@ public class NewServer{
 					if (!oneWayTestFlag && connectedToClientFlag) {//打洞成功，双向模式，开始发包
 						System.out.println("Server: Sender in dup mode");
 						Thread.sleep(5000);
-				        int seq = 0;
-				        while(seq < 1000) {
-				        	unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,"",0);
-				        	history.insert_sent(to_sent);       
-				        	byte[] buf = to_sent.toByteArray();
-				        	DatagramPacket packet = new DatagramPacket(buf, buf.length,
-				            	InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
-				        	serverRecieveSocket.send(packet);
-				        	System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
-				        	seq++;
-						}
+				        int seq = 0, i = 0;
+				        for(int interval = 0 ; interval < 21 ; interval ++) {
+				        	
+				        	for (i = 0;i < 1000 ; i++) {
+				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,"",0);
+				        		history.insert_sent(to_sent);       
+				        		byte[] buf = to_sent.toByteArray();
+				        		DatagramPacket packet = new DatagramPacket(buf, buf.length,
+				        				InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
+				        		serverRecieveSocket.send(packet);
+				        		System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
+				        		seq++;
+				        		
+				        		Thread.sleep(interval);
+				        	}
+				        	Thread.sleep(1000);
+				        }
+				        
 				        System.out.println("Server dup mode finished. Waiting 10s");
 				        Thread.sleep(10000); //双向包发送完毕 等待结束
 				        connectedToClientFlag = false;
 				        oneWayTestFlag = true;
 				        
 				        //TODO
-				        for (int i =0 ; i < history.ACK_history.size(); i++) {
+				        for (i =0 ; i < history.ACK_history.size(); i++) {
 				        	dataWriter.write(connectionID + " " //id 
 				        			 + 1 + " " 				//mode
 				        			 + history.ACK_history.get(i).getdeparture() + " "

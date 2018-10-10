@@ -121,6 +121,7 @@ public class NewClient {
 						clientSocket.send(tosent);
 						//Thread.sleep(10);
 					}
+					
 				}
 				
 			} catch (IOException | InterruptedException e) {
