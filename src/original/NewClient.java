@@ -18,11 +18,13 @@ public class NewClient {
 	public static boolean reqSentFlag = false;
 	public static boolean oneWayMode = true;
 	//public static boolean reqSentFlag = false;
+	
 	public static void main(String[] args) throws Exception {
 		
+		
 		clientSocket = new DatagramSocket(9002);
-		localPort = clientSocket.getLocalPort();
-		localIP = InetAddress.getLocalHost().getHostAddress().toString();
+		//localPort = clientSocket.getLocalPort();
+		//localIP = InetAddress.getLocalHost().getHostAddress().toString();
 		
 		ExecutorService exec = Executors.newCachedThreadPool(); 
 		Thread thread1=new Thread(new ClientReciever());
@@ -38,8 +40,8 @@ public class NewClient {
 		public void run() {
 			try {
 				System.out.println("Clilent listener Online");
-				System.out.println("Client listening at: "+ localIP 
-									+ " : "+ localPort);
+				//System.out.println("Client listening at: "+ localIP 
+				//					+ " : "+ localPort);
 				while(true) {
 					byte[] buf = new byte[packetLength]; // The maxium size of UDP is 65507,  ”œﬂ÷–
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
@@ -104,7 +106,7 @@ public class NewClient {
 					}
 				}
 				
-				Thread.sleep(2000);	
+				Thread.sleep(6000);	
 				
 				if(oneWayMode) {
 					System.out.println("Client sender on one way mode, start send shit to server");
@@ -128,4 +130,6 @@ public class NewClient {
 		
 		}
 	}
+
+
 }

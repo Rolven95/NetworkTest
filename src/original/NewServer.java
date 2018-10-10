@@ -155,9 +155,9 @@ public class NewServer{
 						
 					if (!oneWayTestFlag && connectedToClientFlag) {//打洞成功，双向模式，开始发包
 						System.out.println("Server: Sender in dup mode");
-						Thread.sleep(1500);
+						Thread.sleep(5000);
 				        int seq = 0;
-				        while(seq < 200) {
+				        while(seq < 1000) {
 				        	unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,"",0);
 				        	history.insert_sent(to_sent);       
 				        	byte[] buf = to_sent.toByteArray();
@@ -167,11 +167,11 @@ public class NewServer{
 				        	System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
 				        	seq++;
 						}
-				        
-				        Thread.sleep(2000); //双向包发送完毕 等待结束
+				        System.out.println("Server dup mode finished. Waiting 10s");
+				        Thread.sleep(10000); //双向包发送完毕 等待结束
 				        connectedToClientFlag = false;
 				        oneWayTestFlag = true;
-				        System.out.println("Server dup mode finished. Start data analyzing");
+				        
 				        //TODO
 				        for (int i =0 ; i < history.ACK_history.size(); i++) {
 				        	dataWriter.write(connectionID + " " //id 
