@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 public class NewClient {
 	public static final String serverIP = "192.168.1.105" ; //"13.233.125.32";
 	public static final int serverPort = 9001;
-	
+	public static final int packetLength = 512;
 	public static DatagramSocket clientSocket;
 	public static int localPort; 
 	public static String localIP;
@@ -41,7 +41,7 @@ public class NewClient {
 				System.out.println("Client listening at: "+ localIP 
 									+ " : "+ localPort);
 				while(true) {
-					byte[] buf = new byte[2048]; // The maxium size of UDP
+					byte[] buf = new byte[packetLength]; // The maxium size of UDP is 65507,  ”œﬂ÷–
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					clientSocket.receive(packet);
 				
@@ -53,7 +53,7 @@ public class NewClient {
 						oneWayMode = false; 
 						System.out.println("client in duplex mode");
 						for(int i = 0 ;i < 5 ; i++){
-							//byte[] buf = new byte[2048];
+							//byte[] buf = new byte[packetLength];
 							unicast_packet to_sent = new unicast_packet(-2);
 							//System.out.println("clent type = " + to_sent.getType());
 							buf = to_sent.toByteArray();
@@ -93,7 +93,7 @@ public class NewClient {
 			try {
 				if (!reqSentFlag) {
 					for(int i = 0 ;i < 5 ; i++){
-						byte[] buf = new byte[2048];
+						byte[] buf = new byte[packetLength];
 						unicast_packet to_sent = new unicast_packet(-1, -1);
 						//System.out.println("clent type = " + to_sent.getType());
 						buf = to_sent.toByteArray();
@@ -109,7 +109,7 @@ public class NewClient {
 				if(oneWayMode) {
 					System.out.println("Client sender on one way mode, start send shit to server");
 					for(int i = 0 ;i<10000 ; i++){
-						byte[] buf = new byte[2048];
+						byte[] buf = new byte[packetLength];
 						unicast_packet to_sent = new unicast_packet(i,0);
 						to_sent.setDeparture(System.currentTimeMillis());
 						buf = to_sent.toByteArray();
