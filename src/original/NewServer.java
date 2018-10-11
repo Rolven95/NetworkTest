@@ -10,7 +10,9 @@ import java.util.concurrent.Executors;
 
 public class NewServer{
 	
-	public static final int packetLength = 512;
+	public static final int packetLength = 1024;
+	
+	
 	public static boolean connectedToClientFlag; 
 	public static boolean trySendBackFlag; 
 	public static boolean oneWayTestFlag; 
@@ -38,7 +40,8 @@ public class NewServer{
 		connectionID = 0;
 		history = new History();
 		
-		dataWriter = new DataWriter("/home/ec2-user/","DemoX.txt");
+		dataWriter = new DataWriter("/home/ec2-user/","DemoXI.txt");
+		//dataWriter = new DataWriter("F:/","Demon1024");
 		
 		serverRecieveSocket = new DatagramSocket(9001);
 		
@@ -157,10 +160,10 @@ public class NewServer{
 						System.out.println("Server: Sender in dup mode");
 						Thread.sleep(5000);
 				        int seq = 0, i = 0;
-				        for(int interval = 0 ; interval < 21 ; interval ++) {
+				        for(int interval = 0 ; interval < 9 ; interval ++) {
 				        	
-				        	for (i = 0;i < 1000 ; i++) {
-				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,"",0);
+				        	for (i = 0;i < 50000 ; i++) {
+				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,String.valueOf(interval),0);
 				        		history.insert_sent(to_sent);       
 				        		byte[] buf = to_sent.toByteArray();
 				        		DatagramPacket packet = new DatagramPacket(buf, buf.length,
