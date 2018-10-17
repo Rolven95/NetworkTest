@@ -19,7 +19,7 @@ public class TestPacketLength {
 		
 		buf = testText.getBytes();
 		//int 
-		System.out.println(testpacket.toByteArray().length);
+		System.out.println(testpacket.toByteArray(testpacket.getType()).length);
 		
 	}
  

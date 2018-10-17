@@ -9,13 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewServer{
-	
-	public static final int packetLength = 1024;
-	
+	public static final int packetLength = 65507;
 	
 	public static boolean connectedToClientFlag; 
 	public static boolean trySendBackFlag; 
 	public static boolean oneWayTestFlag; 
+	public static boolean dupTimeOutFlag;
+	public static boolean dupDropFlag;
 	public static boolean sendThreadFlag; 
 	public static boolean receiveThreadFlag; 
 	public static boolean oneWayTimeOutFlag;
@@ -33,6 +33,8 @@ public class NewServer{
 		trySendBackFlag = false; 
 		oneWayTestFlag = true;  // mode switch flag 
 		oneWayTimeOutFlag = false;
+		dupTimeOutFlag = false;
+		dupDropFlag = false;
 		sendThreadFlag = false; 
 		receiveThreadFlag = false; 
 		reqFromIP = "";
@@ -40,8 +42,8 @@ public class NewServer{
 		connectionID = 0;
 		history = new History();
 		
-		dataWriter = new DataWriter("/home/ec2-user/","DemoXI.txt");
-		//dataWriter = new DataWriter("F:/","Demon1024");
+		//dataWriter = new DataWriter("/home/ec2-user/","DemoXV.txt");
+		dataWriter = new DataWriter("F:/","DemonIndia");
 		
 		serverRecieveSocket = new DatagramSocket(9001);
 		
@@ -99,14 +101,15 @@ public class NewServer{
 		                	" reqFromPort: " + reqFromPort );
 						trySendBackFlag = true;    //收到请求 尝试打洞
 						//;continue
-					}else if(arrival.getType() == 1 && connectedToClientFlag && !oneWayTestFlag) { //双收ack 
+					}else if(arrival.getType() == 1 && connectedToClientFlag && !oneWayTestFlag) { //收ack 
 						System.out.println("receved ACK of " + arrival.getSeq());//
 						arrival.setNakArrival(System.currentTimeMillis());
 						history.insert_ACK(arrival);
+						dupTimeOutFlag = true;
 					}else if(arrival.getType() == 0 && connectedToClientFlag){ //单向模式
 						System.out.println(arrival.getSeq() + "recieved (one way mode)");
 						arrival.setArrival(System.currentTimeMillis()); 
-						oneWayTimeOutFlag = true ;
+						oneWayTimeOutFlag = true;
 						//arrival.setArrival(Systemcurrenttime);
 						history.insert_oneWayHistory(arrival);
 					}else if(arrival.getType() == -2){ // 打洞成功
@@ -144,7 +147,7 @@ public class NewServer{
 						while (uselessCounter < 20 && trySendBackFlag){ // 尝试打洞回复客户端
 							unicast_packet to_sent = new unicast_packet(-2);
 							byte[] buf = new byte[packetLength];
-							buf = to_sent.toByteArray();
+							buf = to_sent.toByteArray(to_sent.getType());
 				        	DatagramPacket packet = new DatagramPacket(buf, buf.length,
 				            	InetAddress.getByName(reqFromIP), reqFromPort); 
 				        	System.out.println("Trying to reply to:"+InetAddress.getByName(reqFromIP) 
@@ -158,23 +161,32 @@ public class NewServer{
 						
 					if (!oneWayTestFlag && connectedToClientFlag) {//打洞成功，双向模式，开始发包
 						System.out.println("Server: Sender in dup mode");
+						dupDropFlag = false;
 						Thread.sleep(5000);
-				        int seq = 0, i = 0;
+				        int seq = 0, i = 0, gapCounter = 0;
 				        for(int interval = 0 ; interval < 9 ; interval ++) {
-				        	
 				        	for (i = 0;i < 50000 ; i++) {
 				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,String.valueOf(interval),0);
 				        		history.insert_sent(to_sent);       
-				        		byte[] buf = to_sent.toByteArray();
+				        		byte[] buf = to_sent.toByteArray(to_sent.getType());
 				        		DatagramPacket packet = new DatagramPacket(buf, buf.length,
 				        				InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
 				        		serverRecieveSocket.send(packet);
-				        		System.out.println( seq +" sent to "+reqFromIP + " " + reqFromPort);
+				        		System.out.println( seq+ " size: "+buf.length+" sent to "+reqFromIP + " " + reqFromPort);
 				        		seq++;
-				        		
-				        		Thread.sleep(interval);
+				        		Thread.sleep((int)Math.floor(interval/3));
+				        		gapCounter++; 
+				        		if (gapCounter >= 100) { //实际上为cwdn
+				        			Thread.sleep(10-interval);
+				        			gapCounter=0;
+				        		}
 				        	}
+				        	System.out.println( "Group No."+interval + " Done, Waiting 1000ms ");
 				        	Thread.sleep(1000);
+				        	if(dupDropFlag) {
+				        		System.out.println( "Dup Connection Lost, dropping session");
+				        		break;
+				        	}
 				        }
 				        
 				        System.out.println("Server dup mode finished. Waiting 10s");
@@ -216,20 +228,31 @@ public class NewServer{
 				try{
 					System.out.println("Deamon online");
 					while(true) {
-						Thread.sleep(1000);
+						Thread.sleep(5000);
 						System.out.println("Deamon idling");
+						
+						if(connectedToClientFlag && !oneWayTestFlag &&!trySendBackFlag) {
+							System.out.println("Deamon find dup mode is on");
+							Thread.sleep(15000);
+							while(dupTimeOutFlag) {
+								System.out.println("Deamon: dup running");
+								dupTimeOutFlag = false;
+								Thread.sleep(5000); // time out
+							}
+							System.out.println("Deamon： Server dup timeout!!!!");
+							dupDropFlag = true;
+						}
 						if(connectedToClientFlag && oneWayTestFlag &&!trySendBackFlag) { // connection built
 							System.out.println("Deamon find one way mode is on");
 							Thread.sleep(3000); // wait some time
 							while(oneWayTimeOutFlag) { // check one way mode flag 
 								System.out.println("Deamon: oneway running");
 								oneWayTimeOutFlag = false;
-								Thread.sleep(1000); // time out
+								Thread.sleep(2000); // time out
 							}
 							System.out.println("Deamon： Server oneway timeout!!!!");
 							oneWayTimeOutFlag = false ;
 							connectedToClientFlag = false;
-							//TODO
 							System.out.println("Server: Oneway mode ended, One way timeout, connection break"
 									+ ", start data analyzing");
 					        for (int i =0 ; i < history.oneWay_history.size(); i++) {
@@ -246,7 +269,6 @@ public class NewServer{
 							history.ACK_history.clear();
 							history.sent_history.clear();
 							history.oneWay_history.clear();
-							
 							System.out.println("Server: Data output done, all history cleared, connection id:" + connectionID);
 						}
 					}					

@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 public class NewClient {
 	public static final String serverIP = "192.168.1.105" ; //"13.233.125.32";
 	public static final int serverPort = 9001;
-	public static final int packetLength = 512;
+	public static final int packetLength = 65507;
 	public static DatagramSocket clientSocket;
 	public static int localPort; 
 	public static String localIP;
@@ -58,7 +58,7 @@ public class NewClient {
 							//byte[] buf = new byte[packetLength];
 							unicast_packet to_sent = new unicast_packet(-2);
 							//System.out.println("clent type = " + to_sent.getType());
-							buf = to_sent.toByteArray();
+							buf = to_sent.toByteArray(to_sent.getType());
 							System.out.println("dup notif sent to  " + serverIP +":" + serverPort);
 							DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 									InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
@@ -70,12 +70,12 @@ public class NewClient {
 						unicast_packet to_sent = arrival;
 						arrival.seType(1);
 						arrival.setArrival(System.currentTimeMillis());
-						buf = to_sent.toByteArray();
+						buf = to_sent.toByteArray(to_sent.getType());
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 								InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
 						//Thread.sleep(2000); 
 						clientSocket.send(tosent);
-						System.out.println(arrival.getSeq() + " ACK sent back");
+						System.out.println(arrival.getSeq() + " ACK sent back" + "size: "+buf.length);
 					} else {
 						System.out.println("recieved a shit");
 						
@@ -98,7 +98,7 @@ public class NewClient {
 						byte[] buf = new byte[packetLength];
 						unicast_packet to_sent = new unicast_packet(-1, -1);
 						//System.out.println("clent type = " + to_sent.getType());
-						buf = to_sent.toByteArray();
+						buf = to_sent.toByteArray(to_sent.getType());
 						System.out.println("req sent to " + serverIP +" at " + serverPort);
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 							InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
@@ -114,7 +114,7 @@ public class NewClient {
 						byte[] buf = new byte[packetLength];
 						unicast_packet to_sent = new unicast_packet(i,0);
 						to_sent.setDeparture(System.currentTimeMillis());
-						buf = to_sent.toByteArray();
+						buf = to_sent.toByteArray(to_sent.getType());
 						System.out.println(i + " sent to " + serverIP +" at " + serverPort);
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 							InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
