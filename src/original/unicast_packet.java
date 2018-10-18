@@ -1,6 +1,7 @@
 package original;
 
 
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
@@ -149,10 +150,21 @@ public class unicast_packet {
         long cost = longFrom8Bytes(input, 20+4, false);
         
         
-        String from_addr = (input[28+4] & 0xff) 
+        /*String from_addr = (input[28+4] & 0xff) 
         		+ "." + (input[29+4] & 0xff) 
         		+ "." + (input[30+4] & 0xff)
         		+ "." + (input[31+4] & 0xff);  
+        */
+        byte[] tem = {input[28+4],input[29+4],input[30+4],input[31+4]};
+        String from_addr = null;
+		try {
+			from_addr = new String(tem,"UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        //+ (char)input[29+4]+(char)input[30+4]+(char)input[31+4];  
         
 		result.setDeparture(dep);
 		result.setNakArrival(cost);

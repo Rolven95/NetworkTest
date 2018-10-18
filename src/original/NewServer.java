@@ -42,8 +42,8 @@ public class NewServer{
 		connectionID = 0;
 		history = new History();
 		
-		dataWriter = new DataWriter("/home/ec2-user/","IndiaV.txt");
-		//dataWriter = new DataWriter("F:/","DemonIndia");
+		dataWriter = new DataWriter("/home/ec2-user/","IndiaVI.txt");
+		//dataWriter = new DataWriter("F:/","DemonIndiaVI");
 		
 		serverRecieveSocket = new DatagramSocket(9001);
 		
@@ -176,9 +176,9 @@ public class NewServer{
 				        		seq++;
 				        		Thread.sleep((int)Math.floor(interval/3));
 				        		gapCounter++; 
-				        		if (gapCounter >= (i+1)*100) { //实际上为cwdn
-				        			Thread.sleep(5);
-				        			gapCounter=0;
+				        		if (gapCounter >= (i+1)*30) { //实际上为cwdn
+				        			Thread.sleep(20);
+				        			gapCounter = 0;
 				        			if(dupDropFlag) {
 						        		System.out.println( "Dup Connection Lost, dropping session");
 						        		break;
@@ -206,9 +206,9 @@ public class NewServer{
 				        			 + history.ACK_history.get(i).getArrival() + " "
 				        			 + history.ACK_history.get(i).getNakArrival() + " "
 				        			 + history.ACK_history.get(i).getSeq() + " "
+				        			 + history.ACK_history.get(i).getFrom()
 				        			 + "\r\n");
 				        }
-				        
 				        history.ACK_history.clear();
 				        history.sent_history.clear();
 				        history.oneWay_history.clear(); //just in case
@@ -266,6 +266,7 @@ public class NewServer{
 					        			 + history.oneWay_history.get(i).getdeparture() + " "
 					        			 + history.oneWay_history.get(i).getArrival() + " "
 					        			 + history.oneWay_history.get(i).getSeq() + " "
+					        			 + history.ACK_history.get(i).getFrom()
 					        			 + "\r\n");
 					        }
 					        //dataWriter.afterWriting();
