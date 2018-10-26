@@ -42,7 +42,8 @@ public class NewServer{
 		connectionID = 0;
 		history = new History();
 		
-		dataWriter = new DataWriter("/home/ec2-user/","IndiaVI.txt");
+		//dataWriter = new DataWriter("/home/ec2-user/","Pressure6.txt");
+		dataWriter = new DataWriter("/tmp/","Pressure7.txt");
 		//dataWriter = new DataWriter("F:/","DemonIndiaVI");
 		
 		serverRecieveSocket = new DatagramSocket(9001);
@@ -164,7 +165,8 @@ public class NewServer{
 						dupDropFlag = false;
 						Thread.sleep(5000);
 				        int seq = 0, i = 0, gapCounter = 0;
-				        for(int interval = 0 ; interval < 12 ; interval ++) {
+				    
+				        for(int interval = 0 ; interval < 2 ; interval ++) {
 				        	for (i = 0;i < 50000 ; i++) {
 				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,String.valueOf(interval),0);
 				        		history.insert_sent(to_sent);       
@@ -174,27 +176,89 @@ public class NewServer{
 				        		serverRecieveSocket.send(packet);
 				        		//System.out.println( seq+ " size: "+buf.length+" sent to "+reqFromIP + " " + reqFromPort);
 				        		seq++;
-				        		Thread.sleep((int)Math.floor(interval/3));
+				        		//Thread.sleep((int)Math.floor(interval/3));
 				        		gapCounter++; 
-				        		if (gapCounter >= (i+1)*30) { //实际上为cwdn
-				        			Thread.sleep(20);
+				        		if (gapCounter >= 7) { //实际上为cwdn
+				        			Thread.sleep(interval+2);
 				        			gapCounter = 0;
-				        			if(dupDropFlag) {
-						        		System.out.println( "Dup Connection Lost, dropping session");
+				        			if(dupDropFlag || !connectedToClientFlag) {
+						        		//System.out.println( "Dup Connection Lost, dropping session");
 						        		break;
 						        	}
 				        		}
 				        	}
-				        	if(dupDropFlag) {
+				        	if(dupDropFlag || !connectedToClientFlag) {
 				        		System.out.println( "Dup Connection Lost, dropping session");
 				        		break;
 				        	}
-				        	System.out.println( "Group No."+interval + " Done, Waiting 1000ms ");
-				        	Thread.sleep(1000);
+				        	System.out.println( "Group No."+interval + " Done, Waiting 0ms ");
+				        	//Thread.sleep(1000);
+				        }//************************************************************************************************
+				        for(int interval = 0 ; interval < 1 ; interval ++) {
+				        	for (i = 0;i < 50000 ; i++) {
+				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,String.valueOf(interval),0);
+				        		history.insert_sent(to_sent);       
+				        		byte[] buf = to_sent.toByteArray(to_sent.getType());
+				        		DatagramPacket packet = new DatagramPacket(buf, buf.length,
+				        				InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
+				        		serverRecieveSocket.send(packet);
+				        		//System.out.println( seq+ " size: "+buf.length+" sent to "+reqFromIP + " " + reqFromPort);
+				        		seq++;
+				        		//Thread.sleep((int)Math.floor(interval/3));
+				        		gapCounter++; 
+				        		if (gapCounter >= 8) { //实际上为cwdn
+				        			Thread.sleep(interval+3);
+				        			gapCounter = 0;
+				        			if(dupDropFlag || !connectedToClientFlag) {
+						        		//System.out.println( "Dup Connection Lost, dropping session");
+						        		break;
+						        	}
+				        		}
+				        	}
+				        	if(dupDropFlag || !connectedToClientFlag) {
+				        		System.out.println( "Dup Connection Lost, dropping session");
+				        		break;
+				        	}
+				        	System.out.println( "Group No."+interval + " Done, Waiting 0ms ");
+				        	//Thread.sleep(1000);
+				        }
+				        //**************************************************************************************************
+				        
+				        
+				        for(int interval = 0 ; interval < 2 ; interval ++) {
+				        	for (i = 0;i < 50000 ; i++) {
+				        		unicast_packet to_sent = new unicast_packet(seq,System.currentTimeMillis(),0,0,String.valueOf(interval),0);
+				        		history.insert_sent(to_sent);       
+				        		byte[] buf = to_sent.toByteArray(to_sent.getType());
+				        		DatagramPacket packet = new DatagramPacket(buf, buf.length,
+				        				InetAddress.getByName(reqFromIP), reqFromPort); //192.168.202.191  192.168.109.1
+				        		serverRecieveSocket.send(packet);
+				        		//System.out.println( seq+ " size: "+buf.length+" sent to "+reqFromIP + " " + reqFromPort);
+				        		seq++;
+				        		//Thread.sleep((int)Math.floor(interval/3));
+				        		gapCounter++; 
+				        		if (gapCounter >= 9) { //实际上为cwdn
+				        			Thread.sleep(3);
+				        			gapCounter = 0;
+				        			if(dupDropFlag || !connectedToClientFlag) {
+						        		//System.out.println( "Dup Connection Lost, dropping session");
+						        		break;
+						        	}
+				        		}
+				        	}
+				        	if(dupDropFlag || !connectedToClientFlag) {
+				        		System.out.println( "Dup Connection Lost, dropping session");
+				        		break;
+				        	}
+				        	System.out.println( "Group No."+interval + " Done, Waiting 0ms ");
+				        	//Thread.sleep(1000);
 				        }
 				        
-				        System.out.println("Server dup mode finished. Waiting 10s");
-				        Thread.sleep(10000); //双向包发送完毕 等待结束
+				        
+				        //***************************************************************************************************
+				        
+				        System.out.println("Server dup mode finished. Waiting 5s");
+				        Thread.sleep(5000); //双向包发送完毕 等待结束
 				        connectedToClientFlag = false;
 				        oneWayTestFlag = true;
 				        
@@ -241,7 +305,7 @@ public class NewServer{
 							while(dupTimeOutFlag) {
 								System.out.println("Deamon: dup running");
 								dupTimeOutFlag = false;
-								Thread.sleep(5000); // time out
+								Thread.sleep(60000); // time out
 							}
 							System.out.println("Deamon： Server dup timeout!!!!");
 							dupDropFlag = true;
@@ -249,11 +313,11 @@ public class NewServer{
 						}
 						if(connectedToClientFlag && oneWayTestFlag &&!trySendBackFlag) { // connection built
 							System.out.println("Deamon find one way mode is on");
-							Thread.sleep(3000); // wait some time
+							Thread.sleep(10000); // wait some time
 							while(oneWayTimeOutFlag) { // check one way mode flag 
-								System.out.println("Deamon: oneway running");
+								System.out.println("Deamon: oneway running (Check every 60s)");
 								oneWayTimeOutFlag = false;
-								Thread.sleep(5000); // time out
+								Thread.sleep(60000); // time out 1 min
 							}
 							System.out.println("Deamon： Server oneway timeout!!!!");
 							oneWayTimeOutFlag = false ;
