@@ -8,19 +8,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NewClient {
-	public static final String serverIP = "192.168.1.105" ; //"13.233.125.32";
+	public static final String serverIP = "52.66.249.119" ; //"13.233.125.32";
 	public static final int serverPort = 9001;
 	public static final int packetLength = 65507;
 	public static DatagramSocket clientSocket;
 	public static int localPort; 
 	public static String localIP;
-
+	private static int receivedCounter = 0;
 	public static boolean reqSentFlag = false;
 	public static boolean oneWayMode = true;
 	//public static boolean reqSentFlag = false;
 	
 	public static void main(String[] args) throws Exception {
-		
 		
 		clientSocket = new DatagramSocket(9002);
 		//localPort = clientSocket.getLocalPort();
@@ -41,8 +40,15 @@ public class NewClient {
 			try {
 				System.out.println("Clilent listener Online");
 				//System.out.println("Client listening at: "+ localIP 
-				//					+ " : "+ localPort);
+				//		+ " : "+ localPort);
+				int _tmp=0;		
+				long _tmpTime1 = System.currentTimeMillis();
 				while(true) {
+					
+					
+					
+					//long _tmpTime2 = System.currentTimeMillis();
+					
 					byte[] buf = new byte[packetLength]; // The maxium size of UDP is 65507, 视线中
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					clientSocket.receive(packet);
@@ -66,16 +72,27 @@ public class NewClient {
 						}
 					}else if(arrival.getType() == 0) {//收到Data 返回ACK
 						oneWayMode = false; 
+						receivedCounter ++ ;
+						_tmp++;
+						//_tmpTime1 = System.currentTimeMillis();
+						if(_tmp>=200) {
+							
+							System.out.println("Speed:"+ 200*1400/(System.currentTimeMillis()-_tmpTime1));
+							
+							_tmpTime1 = System.currentTimeMillis();
+							_tmp = 0;
+						}
 						//System.out.println("client enter duplex mode");
 						unicast_packet to_sent = arrival;
 						arrival.seType(1);
 						arrival.setArrival(System.currentTimeMillis());
+						//arrival.setFrom("WXWX");
 						buf = to_sent.toByteArray(to_sent.getType());
 						DatagramPacket tosent = new DatagramPacket(buf, buf.length,
 								InetAddress.getByName(serverIP), serverPort); //192.168.202.191  192.168.109.1
 						//Thread.sleep(2000); 
 						clientSocket.send(tosent);
-						System.out.println(arrival.getSeq() + " ACK sent back" + "size: "+buf.length);
+						//System.out.println(arrival.getSeq() + " ACK sent back" + "size: "+buf.length);
 					} else {
 						System.out.println("recieved a shit");
 						
